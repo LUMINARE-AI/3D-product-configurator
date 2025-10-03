@@ -1,3 +1,5 @@
+import banner_img from "../../assets/images/banner_img.png";
+
 function Banner() {
   return (
     <section className="font-montserrat bg-[linear-gradient(180deg,#E2F3FF_20.3%,#FFFFFF_80.71%)] w-full">
@@ -23,7 +25,7 @@ function Banner() {
 
           <div className="mt-8 md:mt-0 md:w-1/2 flex justify-center">
             <img
-              src="src/assets/images/banner_img.png"
+              src={banner_img}
               alt="Wool Toy"
               className="w-full max-w-lg drop-shadow-xl"
             />
