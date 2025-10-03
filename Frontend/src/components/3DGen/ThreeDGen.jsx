@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2, Sparkles, AlertCircle, Upload, Eye, Download, Wallet } from "lucide-react";
 
-const API_BASE = "http://localhost:8000/api/v1/tripo";
+const API_BASE = "http://3.109.157.61:8000/api/v1/tripo";
 
 const ThreeDGen = () => {
   const [mode, setMode] = useState("text");

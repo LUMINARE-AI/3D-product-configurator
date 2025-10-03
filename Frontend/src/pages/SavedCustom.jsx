@@ -13,7 +13,7 @@ const SavedCustom = () => {
     const fetchCustomizations = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8000/api/v1/customizations/all-cust");
+        const response = await fetch("http://3.109.157.61:8000/api/v1/customizations/all-cust");
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -125,3 +125,4 @@ const SavedCustom = () => {
 };
 
 export default SavedCustom;
+

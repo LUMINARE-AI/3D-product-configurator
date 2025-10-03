@@ -19,7 +19,7 @@ export default function UpdateProduct() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/products/${id}`);
+        const res = await fetch(`http://3.109.157.61:8000/api/v1/products/${id}`);
         const data = await res.json();
         if (res.ok) {
           setForm({
@@ -98,7 +98,7 @@ export default function UpdateProduct() {
         formData.append("modelFile", form.modelFile);
       }
 
-      const response = await fetch(`http://localhost:8000/api/v1/products/edit/${id}`, {
+      const response = await fetch(`http://3.109.157.61:8000/api/v1/products/edit/${id}`, {
         method: "PUT",
         body: formData,
       });

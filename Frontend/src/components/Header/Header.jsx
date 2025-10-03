@@ -32,7 +32,7 @@ export default function Header({ buttonLabel = "Login" }) {
 
 const handleLogout = async () => {
   try {
-    const response = await fetch("http://localhost:8000/api/v1/users/logout", {
+    const response = await fetch("http://3.109.157.61:8000/api/v1/users/logout", {
       method: "POST",
       credentials: "include",
     });

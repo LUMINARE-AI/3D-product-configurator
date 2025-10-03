@@ -26,7 +26,7 @@ export default function StudioPage() {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/products/all");
+        const res = await fetch("http://3.109.157.61:8000/api/v1/products/all");
         const data = await res.json();
         if (Array.isArray(data.message)) {
           setAllProducts(data.message);
@@ -47,7 +47,7 @@ export default function StudioPage() {
   useEffect(() => {
     const loadLastCustomization = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/customizations/all");
+        const res = await fetch("http://3.109.157.61:8000/api/v1/customizations/all");
         const data = await res.json();
         
         if (data.success && Array.isArray(data.message)) {
@@ -139,7 +139,7 @@ export default function StudioPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:8000/api/v1/customizations/save", {
+      const res = await fetch("http://3.109.157.61:8000/api/v1/customizations/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

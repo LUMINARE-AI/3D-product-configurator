@@ -34,7 +34,7 @@ export default function AddProduct() {
 
     try {
       setLoading(true);
-      const url = `http://localhost:8000/api/v1/products/create`;
+      const url = `http://3.109.157.61:8000/api/v1/products/create`;
       const formData = new FormData();
 
       formData.append("name", form.name);

@@ -26,7 +26,7 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users/forgot-password", {
+      const response = await fetch("http://3.109.157.61:8000/api/v1/users/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -106,6 +106,8 @@ function ProductCanvasBase({
   const [hoveredPart, setHoveredPart] = useState(null);
   const [appliedColors, setAppliedColors] = useState({});
 
+  
+
   // NEW: Convert array to object format for the Model component
   useEffect(() => {
     const colorMap = {};
@@ -119,7 +121,7 @@ function ProductCanvasBase({
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/products/${id}`);
+        const res = await fetch(`http://3.109.157.61:8000/api/v1/products/${id}`);
         const data = await res.json();
         setProduct(data.message);
       } catch (err) {

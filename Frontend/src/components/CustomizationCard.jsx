@@ -78,7 +78,7 @@ const CustomizationCard = ({ customizations, setCustomizations }) => {
       setDeletingId(id);
 
       const res = await fetch(
-        `http://localhost:8000/api/v1/customizations/${id}`,
+        `http://3.109.157.61:8000/api/v1/customizations/${id}`,
         {
           method: "DELETE",
         }

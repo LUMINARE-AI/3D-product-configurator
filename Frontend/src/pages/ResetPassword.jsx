@@ -33,7 +33,7 @@ function ResetPassword() {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/users/reset-password/${token}`,
+        `http://3.109.157.61:8000/api/v1/users/reset-password/${token}`,
         {
           method: "POST",
           headers: {

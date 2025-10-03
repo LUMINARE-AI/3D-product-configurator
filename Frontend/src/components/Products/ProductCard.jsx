@@ -64,7 +64,7 @@ const ProductCard = ({ products, setProducts, isAdmin }) => {
       setDeletingId(id);
 
       const res = await fetch(
-        `http://localhost:8000/api/v1/products/delete/${id}`,
+        `http://3.109.157.61:8000/api/v1/products/delete/${id}`,
         {
           method: "POST",
         }
