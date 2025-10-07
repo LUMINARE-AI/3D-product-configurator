@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Trash2, Palette } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { API_URL } from "../../config";
+import { API_URL } from "../config";
 
 const CustomizationCard = ({ customizations, setCustomizations }) => {
   const navigate = useNavigate();

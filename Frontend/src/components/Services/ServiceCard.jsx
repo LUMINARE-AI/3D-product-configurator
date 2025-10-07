@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 // ✅ Import all images properly
-import service1 from "../assets/images/service1.jpg";
-import service2 from "../assets/images/service2.jpg";
-import threeD from "../assets/images/3d.jpg";
-import digitalArtist from "../assets/images/digital_artist_male.jpg";
+import service1 from "../../assets/images/service1.jpg";
+import service2 from "../../assets/images/service2.jpg";
+import threeD from "../../assets/images/3d.jpg";
+import digitalArtist from "../../assets/images/digital_artist_male.jpg";
 
 const slides = [
   {
