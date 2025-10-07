@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Logo from "../../assets/images/logo.png"; // path adjust karo
+import { API_URL } from "../../config";
 
 <img
   src={Logo}
@@ -32,7 +33,7 @@ export default function Header({ buttonLabel = "Login" }) {
 
 const handleLogout = async () => {
   try {
-    const response = await fetch("http://3.109.157.61:8000/api/v1/users/logout", {
+    const response = await fetch(`${API_URL}/api/v1/users/logout`, {
       method: "POST",
       credentials: "include",
     });

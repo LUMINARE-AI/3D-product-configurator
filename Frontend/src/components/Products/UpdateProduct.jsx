@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API_URL } from "../../config.js";
 
 export default function UpdateProduct() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ export default function UpdateProduct() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://3.109.157.61:8000/api/v1/products/${id}`);
+        const res = await fetch(`${API_URL}/api/v1/products/${id}`);
         const data = await res.json();
         if (res.ok) {
           setForm({
@@ -98,7 +99,7 @@ export default function UpdateProduct() {
         formData.append("modelFile", form.modelFile);
       }
 
-      const response = await fetch(`http://3.109.157.61:8000/api/v1/products/edit/${id}`, {
+      const response = await fetch(`${API_URL}/api/v1/products/edit/${id}`, {
         method: "PUT",
         body: formData,
       });

@@ -3,6 +3,7 @@ import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import CustomizationCard from "../components/CustomizationCard";
 import Loader from "../components/Animations/Loader";
+import { API_URL } from "../config";
 
 const SavedCustom = () => {
   const [customizations, setCustomizations] = useState([]);
@@ -13,7 +14,7 @@ const SavedCustom = () => {
     const fetchCustomizations = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://3.109.157.61:8000/api/v1/customizations/all-cust");
+        const response = await fetch(`${API_URL}/api/v1/customizations/all-cust`);
         
         if (!response.ok) {
           const errorText = await response.text();

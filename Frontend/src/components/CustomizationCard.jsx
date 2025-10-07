@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Trash2, Palette } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API_URL } from "../../config";
 
 const CustomizationCard = ({ customizations, setCustomizations }) => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ const CustomizationCard = ({ customizations, setCustomizations }) => {
       setDeletingId(id);
 
       const res = await fetch(
-        `http://3.109.157.61:8000/api/v1/customizations/${id}`,
+        `${API_URL}/api/v1/customizations/${id}`,
         {
           method: "DELETE",
         }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { API_URL } from "../config.js";
 
 function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
@@ -33,7 +34,7 @@ function ResetPassword() {
 
     try {
       const response = await fetch(
-        `http://3.109.157.61:8000/api/v1/users/reset-password/${token}`,
+        `${API_URL}/api/v1/users/reset-password/${token}`,
         {
           method: "POST",
           headers: {

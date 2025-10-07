@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react"; // Delete icon
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {API_URL} from "../../config.js";
 
 const ProductCard = ({ products, setProducts, isAdmin }) => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ const ProductCard = ({ products, setProducts, isAdmin }) => {
       setDeletingId(id);
 
       const res = await fetch(
-        `http://3.109.157.61:8000/api/v1/products/delete/${id}`,
+        `${API_URL}/api/v1/products/delete/${id}`,
         {
           method: "POST",
         }

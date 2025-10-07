@@ -2,6 +2,7 @@
 import { useState } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
 
 export default function AddProduct() {
   const [form, setForm] = useState({
@@ -34,7 +35,7 @@ export default function AddProduct() {
 
     try {
       setLoading(true);
-      const url = `http://3.109.157.61:8000/api/v1/products/create`;
+      const url = `${API_URL}/api/v1/products/create`;
       const formData = new FormData();
 
       formData.append("name", form.name);

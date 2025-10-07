@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "../../hooks/useAdmin.js";
+import {API_URL} from "../../config.js";
 
 const FeaturedCreations = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +17,7 @@ const FeaturedCreations = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://3.109.157.61:8000/api/v1/products/all");
+        const res = await fetch(`${API_URL}/api/v1/products/all`);
         const data = await res.json();
 
         if (Array.isArray(data.message)) {

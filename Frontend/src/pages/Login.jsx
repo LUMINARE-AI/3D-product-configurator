@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import "react-toastify/dist/ReactToastify.css";
+import { API_URL } from "../config.js";
 
 function Login() {
   const [loginInfo, setLoginInfo] = useState({
@@ -32,7 +33,7 @@ function Login() {
     
 
     try {
-      const url = "http://3.109.157.61:8000/api/v1/users/login";
+      const url = `${API_URL}/api/v1/users/login`;
       const response = await fetch(url, {
         method: "POST",
         headers: {

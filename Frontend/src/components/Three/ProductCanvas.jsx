@@ -4,6 +4,7 @@ import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import StudioSidebar from "../studio/StudioSidebar";
 import Loader from "../Animations/Loader";
+import { API_URL } from "../../config";
 
 function Model({
   url,
@@ -121,7 +122,7 @@ function ProductCanvasBase({
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://3.109.157.61:8000/api/v1/products/${id}`);
+        const res = await fetch(`${API_URL}/api/v1/products/${id}`);
         const data = await res.json();
         setProduct(data.message);
       } catch (err) {

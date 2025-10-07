@@ -1,23 +1,29 @@
 import { useState } from "react";
 
+// ✅ Import all images properly
+import service1 from "../assets/images/service1.jpg";
+import service2 from "../assets/images/service2.jpg";
+import threeD from "../assets/images/3d.jpg";
+import digitalArtist from "../assets/images/digital_artist_male.jpg";
+
 const slides = [
   {
-    img: "src/assets/images/service1.jpg",
+    img: service1,
     title: "AI-Powered Design",
     desc: "Generate unique woolen patterns and designs using advanced machine learning algorithms",
   },
   {
-    img: "src/assets/images/service2.jpg",
+    img: service2,
     title: "Real-time 3D Rendering",
     desc: "See your changes instantly with our high-performance 3D rendering engine.",
   },
   {
-    img: "src/assets/images/3d.jpg",
+    img: threeD,
     title: "Text-to-Model",
     desc: "Describe your vision and watch as AI creates a 3D model from your words.",
   },
   {
-    img: "src/assets/images/digital_artist_male.jpg",
+    img: digitalArtist,
     title: "Image-to-Model",
     desc: "Get AI assistance 3d Models using Images",
   },
@@ -84,7 +90,7 @@ function Services() {
           {/* Arrows */}
           <button
             onClick={nextSlide}
-            className="absolute top-1/2 right-0 -translate-y-1/2 bg-gray-800 h-[40px] w-[40px] flex items-center justify-center text-white p-3 rounded-full shadow-lg hover:bg-gray-700 z-10"
+            className="absolute cursor-pointer top-1/2 right-0 -translate-y-1/2 bg-gray-800 h-[40px] w-[40px] flex items-center justify-center text-white p-3 rounded-full shadow-lg hover:bg-gray-700 z-10"
           >
             <i className="fa-solid fa-arrow-right"></i>
           </button>
@@ -92,7 +98,7 @@ function Services() {
           {index > 0 && (
             <button
               onClick={prevSlide}
-              className="absolute top-1/2 left-0 -translate-y-1/2 bg-gray-800 text-white h-[40px] w-[40px] flex items-center justify-center p-3 rounded-full shadow-lg hover:bg-gray-700 z-10"
+              className="absolute cursor-pointer top-1/2 left-0 -translate-y-1/2 bg-gray-800 text-white h-[40px] w-[40px] flex items-center justify-center p-3 rounded-full shadow-lg hover:bg-gray-700 z-10"
             >
               <i className="fa-solid fa-arrow-left"></i>
             </button>
