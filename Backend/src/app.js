@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-// ✅ CORS Configuration - Simple & Working
+// ✅ CORS Configuration
 app.use(
   cors({
     origin: [
@@ -19,8 +19,8 @@ app.use(
   })
 );
 
-// Handle preflight requests
-app.options("*", cors());
+// ❌ REMOVE THIS LINE - Ye mat lagao
+// app.options("*", cors());
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
@@ -39,12 +39,11 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/customizations", customizeRouter);
 app.use("/api/v1/tripo", tripoRoutes);
 
-// Root route for testing
+// Root route
 app.get("/", (req, res) => {
   res.json({ 
     message: "WoolCrafts API is running!",
-    status: "active",
-    timestamp: new Date().toISOString()
+    status: "active"
   });
 });
 
