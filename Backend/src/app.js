@@ -4,22 +4,18 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-// ✅ Yahan add karo - cors() se pehle
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
   "https://woolcrafts.in",
   "https://www.woolcrafts.in",
-  // add production URLs here
 ];
 
-// ✅ Purane cors() ko replace karo is se
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or Postman)
       if (!origin) return callback(null, true);
-
+      
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
           "The CORS policy for this site does not allow access from the specified Origin.";
@@ -32,6 +28,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ ADD THIS - Handle preflight requests explicitly
+app.options("*", cors());
 
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
