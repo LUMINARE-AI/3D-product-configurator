@@ -5,11 +5,20 @@ import FormData from "form-data";
 import fs from "fs";
 import axios from "axios";
 
-const TRIPO_API_KEY = process.env.TRIPO_API_KEY;
-const TRIPO_BASE_URL = process.env.TRIPO_BASE_URL || "https://api.tripo3d.ai/v2/openapi";
+const getTripoConfig = () => {
+  const TRIPO_API_KEY = process.env.TRIPO_API_KEY;
+  const TRIPO_BASE_URL = process.env.TRIPO_BASE_URL || "https://api.tripo3d.ai/v2/openapi";
+  
+  if (!TRIPO_API_KEY) {
+    throw new ApiError(500, "Tripo API key not configured");
+  }
+  
+  return { TRIPO_API_KEY, TRIPO_BASE_URL };
+};
 
 // 🆕 Get User Balance
 const getBalance = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   if (!TRIPO_API_KEY) {
     throw new ApiError(500, "Tripo API key not configured");
   }
@@ -52,6 +61,7 @@ const getBalance = asyncHandler(async (req, res) => {
 
 // Text to Model - Create Task
 const textToModel = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   const { prompt } = req.body;
 
   if (!prompt) {
@@ -104,6 +114,7 @@ const textToModel = asyncHandler(async (req, res) => {
 
 // Upload Image to Tripo3D - AXIOS VERSION
 const uploadImage = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   if (!req.file) {
     throw new ApiError(400, "Image file is required");
   }
@@ -170,6 +181,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 
 // Single Image to Model
 const imageToModel = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   const { image_token, file_type } = req.body;
 
   if (!image_token || !file_type) {
@@ -223,6 +235,7 @@ const imageToModel = asyncHandler(async (req, res) => {
 
 // Multi-Image to Model
 const multiImageToModel = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   const { image_tokens } = req.body;
 
   if (!image_tokens || !Array.isArray(image_tokens)) {
@@ -283,6 +296,7 @@ const multiImageToModel = asyncHandler(async (req, res) => {
 
 // Get Task Status (Polling)
 const getTaskStatus = asyncHandler(async (req, res) => {
+  const { TRIPO_API_KEY, TRIPO_BASE_URL } = getTripoConfig();
   const { taskId } = req.params;
 
   if (!taskId || taskId === "undefined") {
