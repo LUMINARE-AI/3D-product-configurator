@@ -77,57 +77,58 @@ export default function UpdateProduct() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  
+  if (!form.name || !form.description) {
+    toast.error("Name and description are required");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    toast.info("Updating product...");
     
-    if (!form.name || !form.description) {
-      toast.error("Name and description are required");
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("description", form.description);
+
+    if (form.coverImageURL) {
+      formData.append("coverImageURL", form.coverImageURL);
+    }
+    if (form.modelFile) {
+      formData.append("modelFile", form.modelFile);
+    }
+
+    const response = await fetch(`${API_URL}/api/v1/products/edit/${id}`, {
+      method: "PUT",
+      credentials: 'include',  // ✅ This is required!
+      body: formData,
+    });
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      toast.error("Server error. Check backend logs.");
       return;
     }
 
-    try {
-      setLoading(true);
-      toast.info("Updating product...");
-      
-      const formData = new FormData();
-      formData.append("name", form.name);
-      formData.append("description", form.description);
+    const result = await response.json();
 
-      if (form.coverImageURL) {
-        formData.append("coverImageURL", form.coverImageURL);
-      }
-      if (form.modelFile) {
-        formData.append("modelFile", form.modelFile);
-      }
-
-      const response = await fetch(`${API_URL}/api/v1/products/edit/${id}`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("Non-JSON response:", text);
-        toast.error("Server error. Check backend logs.");
-        return;
-      }
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast.success("Product updated successfully!");
-        setTimeout(() => navigate("/gallery"), 1500);
-      } else {
-        toast.error(result.message || "Failed to update product");
-        console.error("Server error:", result);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      toast.error(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
+    if (response.ok) {
+      toast.success("Product updated successfully!");
+      setTimeout(() => navigate("/gallery"), 1500);
+    } else {
+      toast.error(result.message || "Failed to update product");
+      console.error("Server error:", result);
     }
-  };
+  } catch (err) {
+    console.error("Error:", err);
+    toast.error(`Error: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-xl mx-auto font-montserrat p-6">
