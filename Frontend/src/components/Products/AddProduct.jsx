@@ -12,8 +12,10 @@ export default function AddProduct() {
     modelFile: null,
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // ✅ Add error state
 
   const navigate = useNavigate();
+  
   const handleChange = async (e) => {
     const { name, type, value, files } = e.target;
     setForm({
@@ -24,14 +26,17 @@ export default function AddProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // ✅ Reset error
 
     if (
       !form.name ||
       !form.description ||
       !form.coverImageURL ||
       !form.modelFile
-    )
+    ) {
+      setError("All fields are required");
       return;
+    }
 
     try {
       setLoading(true);
@@ -43,15 +48,19 @@ export default function AddProduct() {
       formData.append("coverImageURL", form.coverImageURL);
       formData.append("modelFile", form.modelFile);
 
+      console.log("Sending request to:", url); // ✅ Debug log
+
       const response = await fetch(url, {
         method: "POST",
         body: formData,
+        credentials: "include", // ✅ IMPORTANT - Add this
       });
 
-      if (response.ok) {
-        navigate("/gallery");
-      } else {
-        console.log("Failed to create product");
+      console.log("Response status:", response.status); // ✅ Debug log
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to create product: ${response.status}`);
       }
 
       const result = await response.json();
@@ -64,24 +73,38 @@ export default function AddProduct() {
         coverImageURL: null,
         modelFile: null,
       });
+
+      // Navigate to gallery
+      navigate("/gallery");
+      
     } catch (err) {
-      console.log("Error:", err);
+      console.error("Error:", err);
+      setError(err.message || "Failed to create product");
+    } finally {
+      setLoading(false); // ✅ Always reset loading
     }
   };
 
   return (
     <div className="max-w-xl mx-auto font-montserrat p-6">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <h3 className="text-center mt-6 mb-6 text-3xl font-weight: 600 text-gray-900 ">
+        <h3 className="text-center mt-6 mb-6 text-3xl font-weight: 600 text-gray-900">
           Add a new Product
         </h3>
+
+        {/* ✅ Show error message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+
         <div>
           <label
             htmlFor="name"
-            className=" block text-md font-medium text-gray-700 mb-2"
+            className="block text-md font-medium text-gray-700 mb-2"
           >
-            {" "}
-            Name{" "}
+            Name
           </label>
           <input
             type="text"
@@ -90,66 +113,65 @@ export default function AddProduct() {
             placeholder="Product Name (Should be Unique)"
             value={form.name}
             onChange={handleChange}
-            className="!imprtant border border-gray-300  p-2 rounded w-full"
+            className="border border-gray-300 p-2 rounded w-full"
           />
         </div>
 
         <div>
           <label
             htmlFor="description"
-            className="block text-md font-medium text-gray-700 mb-2 form-label"
+            className="block text-md font-medium text-gray-700 mb-2"
           >
-            {" "}
-            Description{" "}
+            Description
           </label>
           <textarea
-            type="text"
             required
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="!imprtant border border-gray-300  p-2 rounded w-full"
+            className="border border-gray-300 p-2 rounded w-full"
+            rows="4"
           />
         </div>
 
         <div>
           <label
             htmlFor="coverImageURL"
-            className="block text-md font-medium text-gray-700 mb-2 form-label"
+            className="block text-md font-medium text-gray-700 mb-2"
           >
-            {" "}
-            Cover Image (png / jpg or any other format){" "}
+            Cover Image (png / jpg or any other format)
           </label>
           <input
             type="file"
             required
             name="coverImageURL"
+            accept="image/*"
             onChange={handleChange}
-            className="!imprtant border border-gray-300 otline-color:gray outline-hidden p-2 rounded w-full"
+            className="border border-gray-300 p-2 rounded w-full"
           />
         </div>
 
         <div>
           <label
             htmlFor="modelFile"
-            className="!imprtant block text-md font-medium text-gray-700 mb-2 form-label"
+            className="block text-md font-medium text-gray-700 mb-2"
           >
-            {" "}
-            ProductFile (.glb){" "}
+            Product File (.glb)
           </label>
           <input
             type="file"
             required
             name="modelFile"
+            accept=".glb"
             onChange={handleChange}
-            className=" !imprtant border border-gray-300 otline-color:gray outline-hidden p-2 rounded w-full"
+            className="border border-gray-300 p-2 rounded w-full"
           />
         </div>
 
-         <button
-          className="cursor-pointer w-full md:w-auto px-7 py-3 flex items-center justify-center gap-2 rounded-xl font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF]"
+        <button
+          className="cursor-pointer w-full md:w-auto px-7 py-3 flex items-center justify-center gap-2 rounded-xl font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF] disabled:opacity-50 disabled:cursor-not-allowed"
           type="submit"
-          disabled={loading} // ✅ disable when loading
+          disabled={loading}
         >
           {loading ? (
             <span className="flex items-center gap-2">
