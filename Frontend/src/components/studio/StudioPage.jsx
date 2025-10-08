@@ -89,7 +89,7 @@ export default function StudioPage() {
       setSelectedPart(null);
       setCurrentColor("#ec4899");
       setSavedCustomizationId(null);
-      navigate(`/studio/${productId}`);
+      window.location.href = `/studio/${productId}`
     }
   };
 

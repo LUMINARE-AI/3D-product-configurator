@@ -118,7 +118,7 @@ const FeaturedCreations = () => {
               <div className="flex justify-center mt-8">
                 <button
                   onClick={handleLoadMore}
-                  className="px-7 py-3 flex items-center gap-2 rounded-full font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF] hover:scale-105 transition-all"
+                  className="cursor-pointer px-7 py-3 flex items-center gap-2 rounded-full font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF] hover:scale-105 transition-all"
                 >
                   Load More <i className="fa fa-plus"></i>
                 </button>

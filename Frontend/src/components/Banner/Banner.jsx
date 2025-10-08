@@ -1,6 +1,19 @@
 import banner_img from "../../assets/images/banner_img.png";
+import { useNavigate } from "react-router-dom";
 
 function Banner() {
+
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token"); // ya jo bhi tu use kar raha hai auth ke liye
+
+  const handleProtectedLink = (path) => {
+    if (isLoggedIn) {
+      navigate(path);
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <section className="font-montserrat bg-[linear-gradient(180deg,#E2F3FF_20.3%,#FFFFFF_80.71%)] w-full">
       <div className="max-w-7xl mx-auto px-6">
@@ -15,8 +28,8 @@ function Banner() {
               crafting is here.
             </p>
             <a
-              href="/gallery"
-              className="flex justify-center items-center px-6 py-3 gap-4 bg-gradient-to-l from-[#52B0FF] to-[#3E8DE3] rounded-2xl text-white font-medium shadow-lg hover:opacity-90 transition"
+              onClick={() => handleProtectedLink("/gallery")}
+              className="flex cursor-pointer justify-center items-center px-6 py-3 gap-4 bg-gradient-to-l from-[#52B0FF] to-[#3E8DE3] rounded-2xl text-white font-medium shadow-lg hover:opacity-90 transition"
             >
               Get Started With 3D Studio
               <i className="fa-solid fa-arrow-right text-sm"></i>

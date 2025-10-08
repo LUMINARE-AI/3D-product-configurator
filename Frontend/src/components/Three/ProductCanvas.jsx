@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import StudioSidebar from "../studio/StudioSidebar";
 import Loader from "../Animations/Loader";
 import { API_URL } from "../../config";
+import * as THREE from "three";
 
 function Model({
   url,
@@ -12,6 +13,7 @@ function Model({
   setHoveredPart,
   onPartsLoaded,
   appliedColors,
+  selectedPart,
 }) {
   const { scene } = useGLTF(url);
   const originalColors = useRef({});
@@ -54,6 +56,11 @@ function Model({
             child.material.needsUpdate = true;
           }
           child.material.color.set(appliedColors[partName]);
+          
+          // Color apply hone ke baad highlight hat jaye
+          child.material.emissive.setHex(0x000000);
+          child.material.emissiveIntensity = 0;
+          child.material.needsUpdate = true;
         } else {
           const origColor = originalColors.current[child.material.uuid];
           const origMat = originalMaterials.current[child.material.uuid];
@@ -64,6 +71,25 @@ function Model({
       }
     });
   }, [appliedColors, scene]);
+
+  // Handle highlight on selected part
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh && child.material?.name) {
+        const partName = child.material.name;
+
+        // Sirf highlight kare agar part selected ho aur color apply nahi hua ho
+        if (selectedPart && partName === selectedPart) {
+          child.material.emissive.setHex(0x0066FF);
+          child.material.emissiveIntensity = 0.5;
+          child.material.wireframe = false;
+        } else {
+          child.material.emissive.setHex(0x000000);
+          child.material.emissiveIntensity = 0;
+        }
+      }
+    });
+  }, [selectedPart, scene]);
 
   return (
     <primitive
@@ -97,8 +123,8 @@ function ProductCanvasBase({
   setCurrentColor,
   selectedPart,
   setSelectedPart,
-  appliedCustomizations = [], 
-  setAppliedCustomizations, 
+  appliedCustomizations = [],
+  setAppliedCustomizations,
 }) {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -107,9 +133,7 @@ function ProductCanvasBase({
   const [hoveredPart, setHoveredPart] = useState(null);
   const [appliedColors, setAppliedColors] = useState({});
 
-  
-
-  // NEW: Convert array to object format for the Model component
+  // Convert array to object format for the Model component
   useEffect(() => {
     const colorMap = {};
     appliedCustomizations.forEach((custom) => {
@@ -134,14 +158,15 @@ function ProductCanvasBase({
     fetchProduct();
   }, [id]);
 
-  // UPDATED: Sync changes back to parent component
   const handleApply = (part, color) => {
     setAppliedColors((prev) => ({
       ...prev,
       [part]: color,
     }));
 
-    // Update parent's appliedCustomizations array
+    // Apply karte time selectedPart ko null kare taaki highlight hat jaye
+    setSelectedPart(null);
+
     if (setAppliedCustomizations) {
       setAppliedCustomizations((prev) => {
         const existing = prev.find((c) => c.partName === part);
@@ -170,12 +195,9 @@ function ProductCanvasBase({
                 appliedColors={appliedColors}
                 setHoveredPart={setHoveredPart}
                 onPartsLoaded={setParts}
+                selectedPart={selectedPart}
               />
-              <OrbitControls
-                makeDefault
-                enableDamping
-                enablePan={false}
-              />
+              <OrbitControls makeDefault enableDamping enablePan={false} />
             </Suspense>
           </Canvas>
 
