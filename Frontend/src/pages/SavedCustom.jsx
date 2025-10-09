@@ -4,8 +4,12 @@ import Footer from "../components/Footer/Footer";
 import CustomizationCard from "../components/CustomizationCard";
 import Loader from "../components/Animations/Loader";
 import { API_URL } from "../config";
+import { useAuth } from "../hooks/useAuth";
+
+
 
 const SavedCustom = () => {
+  const isLoggedIn = useAuth();
   const [customizations, setCustomizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -57,7 +61,7 @@ const SavedCustom = () => {
   if (error) {
     return (
       <div>
-        <Header />
+        <Header buttonLabel={isLoggedIn ? "LogOut" : "Login"}  />
         <div className="font-montserrat flex justify-center items-center h-screen">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-red-500 mb-4">Error</h1>
