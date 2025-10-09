@@ -20,63 +20,62 @@ function Login() {
     setLoginInfo({ ...loginInfo, [name]: value });
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    const { email, password } = loginInfo;
-    
-    if (!email || !password) {
-      return toast.error("Email and Password required");
-    }
+const handleLogin = async (e) => {
+  e.preventDefault();
+  const { email, password } = loginInfo;
+  
+  if (!email || !password) {
+    return toast.error("Email and Password required");
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    
+  try {
+    const url = `${API_URL}/api/v1/users/login`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginInfo),
+    });
 
+    // First check if response is ok before parsing JSON
+    let result;
     try {
-      const url = `${API_URL}/api/v1/users/login`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginInfo),
-      });
-
-      const result = await response.json();
-
-      // Handle different response statuses
-      if (response.ok) {
-        // Success
-        toast.success(result.message || "Login successful!");
-        
-        // Store token and role
-        localStorage.setItem("token", result.data.accessToken);
-        localStorage.setItem("userRole", result.data.role || "user");
-        localStorage.setItem("loggedInUser", result.data.user.name);
-        
-        setTimeout(() => {
-          navigate("/home");
-        }, 1000);
-      } else {
-        // Error responses
-        if (response.status === 400) {
-          // User not found or invalid credentials
-          toast.error(result.message || "Invalid email or password");
-        } else if (response.status === 404) {
-          toast.error("User not found. Please check your email.");
-        } else if (response.status === 401) {
-          toast.error("Incorrect password. Please try again.");
-        } else {
-          toast.error(result.message || "Login failed. Please try again.");
-        }
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("User Not Found");
-    } finally {
+      result = await response.json();
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      toast.error("Invalid Credentials. Please try again.");
       setLoading(false);
+      return;
     }
-  };
+
+    // Handle different response statuses
+    if (response.ok) {
+      // Success
+      toast.success(result.message || "Login successful!");
+      
+      // Store token and role
+      localStorage.setItem("token", result.data.accessToken);
+      localStorage.setItem("userRole", result.data.role || "user");
+      localStorage.setItem("loggedInUser", result.data.user.name);
+      
+      setTimeout(() => {
+        navigate("/gallery");
+      }, 1000);
+    } else {
+      // Error responses - show exact backend message
+      const errorMessage = result.message || result.error || "Login failed. Please try again.";
+      toast.error(errorMessage);
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    toast.error("Network error. Please check your connection.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>

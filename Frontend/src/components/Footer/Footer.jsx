@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/images/logo.png";
+import footerbkg from "../../assets/images/footer-bkg.png";
 
 function Footer() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ function Footer() {
 
   return (
     <footer className="font-montserrat bg-[#def5ff] bg-cover bg-center bg-blend-overlay text-white">
-      <div className="bg-[url('/images/footer-bkg.png')] text-dark">
+      <div style={{ backgroundImage: `url(${footerbkg})` }} className=" text-dark">
         <div className="max-w-7xl mx-auto px-6 text-[#000] py-12 flex flex-col md:flex-row justify-between items-center md:items-start text-center md:text-left gap-12">
           
           <div className="mx-auto">

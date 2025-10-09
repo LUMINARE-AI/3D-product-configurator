@@ -13,7 +13,7 @@ function Model({
   setHoveredPart,
   onPartsLoaded,
   appliedColors,
-  selectedPart,
+  highlightedPart,
 }) {
   const { scene } = useGLTF(url);
   const originalColors = useRef({});
@@ -56,8 +56,6 @@ function Model({
             child.material.needsUpdate = true;
           }
           child.material.color.set(appliedColors[partName]);
-          
-          // Color apply hone ke baad highlight hat jaye
           child.material.emissive.setHex(0x000000);
           child.material.emissiveIntensity = 0;
           child.material.needsUpdate = true;
@@ -72,24 +70,46 @@ function Model({
     });
   }, [appliedColors, scene]);
 
-  // Handle highlight on selected part
+ // Animated highlight with pulse effect
   useEffect(() => {
-    scene.traverse((child) => {
-      if (child.isMesh && child.material?.name) {
-        const partName = child.material.name;
+    let animationId;
+    let startTime = Date.now();
 
-        // Sirf highlight kare agar part selected ho aur color apply nahi hua ho
-        if (selectedPart && partName === selectedPart) {
-          child.material.emissive.setHex(0x0066FF);
-          child.material.emissiveIntensity = 0.5;
-          child.material.wireframe = false;
-        } else {
-          child.material.emissive.setHex(0x000000);
-          child.material.emissiveIntensity = 0;
-        }
+    const animateHighlight = () => {
+      if (highlightedPart) {
+        const elapsed = Date.now() - startTime;
+        const progress = (elapsed % 1000) / 1000; // 0 to 1 in 1 second loop
+        const intensity = 0.3 + Math.sin(progress * Math.PI * 2) * 0.3; // Pulse between 0.3 and 0.6
+
+        scene.traverse((child) => {
+          if (child.isMesh && child.material?.name) {
+            const partName = child.material.name;
+
+            if (partName === highlightedPart) {
+              child.material.emissive.setHex(0x0066ff);
+              child.material.emissiveIntensity = intensity;
+              child.material.needsUpdate = true;
+            }
+          }
+        });
+
+        animationId = requestAnimationFrame(animateHighlight);
+      } else {
+        // Remove all emissive when highlight is gone
+        scene.traverse((child) => {
+          if (child.isMesh) {
+            child.material.emissive.setHex(0x000000);
+            child.material.emissiveIntensity = 0;
+            child.material.needsUpdate = true;
+          }
+        });
       }
-    });
-  }, [selectedPart, scene]);
+    };
+
+    animateHighlight();
+
+    return () => cancelAnimationFrame(animationId);
+  }, [highlightedPart, scene]);
 
   return (
     <primitive
@@ -132,6 +152,21 @@ function ProductCanvasBase({
   const [parts, setParts] = useState([]);
   const [hoveredPart, setHoveredPart] = useState(null);
   const [appliedColors, setAppliedColors] = useState({});
+  const [highlightedPart, setHighlightedPart] = useState(null);
+
+  // Jab part click ho to:
+  // 1. selectedPart ko set karo (apply button ke liye)
+  // 2. highlightedPart ko set karo (visual effect ke liye)
+  // 3. 1-2 second baad highlightedPart ko null karo (highlight disable ho jaye)
+  useEffect(() => {
+    if (selectedPart) {
+      setHighlightedPart(selectedPart);
+      const timeout = setTimeout(() => {
+        setHighlightedPart(null); // Sirf highlight disable ho, selectedPart nahi
+      }, 1200); // 1.2 seconds
+      return () => clearTimeout(timeout);
+    }
+  }, [selectedPart]);
 
   // Convert array to object format for the Model component
   useEffect(() => {
@@ -164,16 +199,14 @@ function ProductCanvasBase({
       [part]: color,
     }));
 
-    // Apply karte time selectedPart ko null kare taaki highlight hat jaye
-    setSelectedPart(null);
+    // Apply karte time selectedPart ko null na karo (taki apply button disable na ho)
+    // Ya agar disable karna hai to optional
 
     if (setAppliedCustomizations) {
       setAppliedCustomizations((prev) => {
         const existing = prev.find((c) => c.partName === part);
         if (existing) {
-          return prev.map((c) =>
-            c.partName === part ? { ...c, color } : c
-          );
+          return prev.map((c) => (c.partName === part ? { ...c, color } : c));
         } else {
           return [...prev, { partName: part, color }];
         }
@@ -195,7 +228,7 @@ function ProductCanvasBase({
                 appliedColors={appliedColors}
                 setHoveredPart={setHoveredPart}
                 onPartsLoaded={setParts}
-                selectedPart={selectedPart}
+                highlightedPart={highlightedPart}
               />
               <OrbitControls makeDefault enableDamping enablePan={false} />
             </Suspense>
@@ -212,12 +245,15 @@ function ProductCanvasBase({
             onApply={handleApply}
           />
 
+          {/* Hover Tooltip */}
           {hoveredPart && (
             <div
-              className="absolute bg-black/80 text-white px-3 py-1.5 rounded-md text-xs pointer-events-none"
+              className="absolute bg-black/90 text-white px-4 py-2 rounded-lg text-sm pointer-events-none
+              shadow-lg border border-blue-500/50 backdrop-blur-sm animate-fadeIn"
               style={{ left: hoveredPart.x + 10, top: hoveredPart.y + 10 }}
             >
-              {hoveredPart.name}
+              <span className="font-semibold">{hoveredPart.name}</span>
+              <div className="text-xs text-blue-300 mt-1">Click to select</div>
             </div>
           )}
 
