@@ -529,23 +529,28 @@ const ThreeDGen = () => {
                   </div>
 
                   <div className="mt-4 flex gap-3">
-                    {generatedModel.model && (
+                    {generatedModel.originalUrl && (
                       <a
-                        href={generatedModel.model}
-                        download="model.glb"
+                        href={generatedModel.originalUrl}
+                        download={`woolcrafts-model-${Date.now()}.glb`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-center font-medium hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2"
+                        className={`py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-center font-medium hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2 ${
+                          generatedModel.pbr_model &&
+                          generatedModel.pbr_model !== generatedModel.model
+                            ? "flex-1"
+                            : "w-full"
+                        }`}
                       >
                         <Download className="w-4 h-4" />
-                        Download GLB
+                        Download Model
                       </a>
                     )}
                     {generatedModel.pbr_model &&
                       generatedModel.pbr_model !== generatedModel.model && (
                         <a
-                          href={generatedModel.pbr_model}
-                          download="model_pbr.glb"
+                          href={generatedModel.originalUrl}
+                          download={`woolcrafts-model-pbr-${Date.now()}.glb`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg text-center font-medium hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2"
