@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState, useRef, memo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, useGLTF } from "@react-three/drei";
+import { OrbitControls, Environment, useGLTF, Center } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import StudioSidebar from "../studio/StudioSidebar";
 import Loader from "../Animations/Loader";
@@ -18,6 +18,38 @@ function Model({
   const { scene } = useGLTF(url);
   const originalColors = useRef({});
   const originalMaterials = useRef({});
+  const modelRef = useRef();
+
+  // Auto-scale model to fit viewport perfectly
+  // Auto-scale model to a consistent size for all products
+useEffect(() => {
+  if (scene) {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    // Get largest dimension (width, height, or depth)
+    const maxDim = Math.max(size.x, size.y, size.z);
+
+    // 🔹 Set a consistent target size for all models
+    const targetSize = 1.2; // Adjust this value to make all models appear same size
+
+    // Calculate scale factor
+    const scale = targetSize / maxDim;
+
+    // Apply scaling
+    scene.scale.setScalar(scale);
+
+    // Center the model
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    scene.position.sub(center.multiplyScalar(scale));
+
+    // Slight lift above ground
+    scene.position.y += size.y * scale * 0.05;
+  }
+}, [scene]);
+
 
   useEffect(() => {
     const colors = {};
@@ -70,7 +102,6 @@ function Model({
     });
   }, [appliedColors, scene]);
 
- // Animated highlight with pulse effect
   useEffect(() => {
     let animationId;
     let startTime = Date.now();
@@ -78,8 +109,8 @@ function Model({
     const animateHighlight = () => {
       if (highlightedPart) {
         const elapsed = Date.now() - startTime;
-        const progress = (elapsed % 1000) / 1000; // 0 to 1 in 1 second loop
-        const intensity = 0.3 + Math.sin(progress * Math.PI * 2) * 0.3; // Pulse between 0.3 and 0.6
+        const progress = (elapsed % 1000) / 1000;
+        const intensity = 0.3 + Math.sin(progress * Math.PI * 2) * 0.3;
 
         scene.traverse((child) => {
           if (child.isMesh && child.material?.name) {
@@ -95,7 +126,6 @@ function Model({
 
         animationId = requestAnimationFrame(animateHighlight);
       } else {
-        // Remove all emissive when highlight is gone
         scene.traverse((child) => {
           if (child.isMesh) {
             child.material.emissive.setHex(0x000000);
@@ -113,6 +143,7 @@ function Model({
 
   return (
     <primitive
+      ref={modelRef}
       object={scene}
       onClick={(e) => {
         e.stopPropagation();
@@ -137,6 +168,24 @@ function Model({
   );
 }
 
+function Lights() {
+  return (
+    <>
+      {/* Bright ambient light for clean look */}
+      <ambientLight intensity={1.2} />
+      
+      {/* Key light from front-right */}
+      <directionalLight position={[5, 5, 5]} intensity={1} />
+      
+      {/* Fill light from left */}
+      <directionalLight position={[-5, 3, 3]} intensity={0.5} />
+      
+      {/* Back light to eliminate shadows */}
+      <directionalLight position={[0, 5, -5]} intensity={0.5} />
+    </>
+  );
+}
+
 function ProductCanvasBase({
   sidebarOpen,
   currentColor,
@@ -154,21 +203,16 @@ function ProductCanvasBase({
   const [appliedColors, setAppliedColors] = useState({});
   const [highlightedPart, setHighlightedPart] = useState(null);
 
-  // Jab part click ho to:
-  // 1. selectedPart ko set karo (apply button ke liye)
-  // 2. highlightedPart ko set karo (visual effect ke liye)
-  // 3. 1-2 second baad highlightedPart ko null karo (highlight disable ho jaye)
   useEffect(() => {
     if (selectedPart) {
       setHighlightedPart(selectedPart);
       const timeout = setTimeout(() => {
-        setHighlightedPart(null); // Sirf highlight disable ho, selectedPart nahi
-      }, 1200); // 1.2 seconds
+        setHighlightedPart(null);
+      }, 1200);
       return () => clearTimeout(timeout);
     }
   }, [selectedPart]);
 
-  // Convert array to object format for the Model component
   useEffect(() => {
     const colorMap = {};
     appliedCustomizations.forEach((custom) => {
@@ -199,9 +243,6 @@ function ProductCanvasBase({
       [part]: color,
     }));
 
-    // Apply karte time selectedPart ko null na karo (taki apply button disable na ho)
-    // Ya agar disable karna hai to optional
-
     if (setAppliedCustomizations) {
       setAppliedCustomizations((prev) => {
         const existing = prev.find((c) => c.partName === part);
@@ -215,13 +256,29 @@ function ProductCanvasBase({
   };
 
   return (
-    <div className="w-full h-screen relative">
+    <div className="w-full h-screen relative bg-white">
       {loading && <Loader />}
       {product && (
         <>
-          <Canvas camera={{ position: [0, 0, 1.5], near: 0.025 }}>
+          <Canvas 
+            camera={{ position: [0, 0, 2.8], fov: 40, near: 0.1, far: 1000 }}
+            gl={{ 
+              antialias: true,
+              preserveDrawingBuffer: true,
+              toneMapping: THREE.ACESFilmicToneMapping,
+              toneMappingExposure: 1.2,
+              outputColorSpace: THREE.SRGBColorSpace
+            }}
+            style={{ background: '#ffffff' }}
+          >
             <Suspense fallback={null}>
-              <Environment preset="sunset" />
+              {/* Model viewer style lighting */}
+              <Lights />
+              
+              {/* Neutral environment for clean white background */}
+              <Environment preset="city" intensity={0.3} />
+              
+              {/* Model with automatic size normalization */}
               <Model
                 url={product.modelFile}
                 setSelectedPart={setSelectedPart}
@@ -230,7 +287,15 @@ function ProductCanvasBase({
                 onPartsLoaded={setParts}
                 highlightedPart={highlightedPart}
               />
-              <OrbitControls makeDefault enableDamping enablePan={false} />
+              
+              <OrbitControls 
+                makeDefault 
+                enableDamping 
+                dampingFactor={0.05}
+                enablePan={false}
+                minDistance={1.5}
+                maxDistance={6}
+              />
             </Suspense>
           </Canvas>
 
@@ -263,7 +328,7 @@ function ProductCanvasBase({
   text-black text-base font-semibold
   bg-white/20 backdrop-blur-md
   border border-white/30
-  px-5 py-2 rounded-3xl
+  px-5 py-2 rounded-xl
   shadow-[0_8px_25px_rgba(0,0,0,0.3)]
   text-center
   tracking-wide

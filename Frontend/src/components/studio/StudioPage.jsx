@@ -91,7 +91,7 @@ export default function StudioPage() {
       setSavedCustomizationId(null);
       window.location.href = `/studio/${productId}`
     }
-  };
+  }; 
 
   // Load pre-existing customizations (from "Customize Again")
   useEffect(() => {
@@ -309,16 +309,16 @@ export default function StudioPage() {
           setAppliedCustomizations={setAppliedCustomizations}
         />
 
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 mb-4">
           <button
-            className="cursor-pointer px-8 py-4 text-white font-bold uppercase bg-gradient-to-r from-[#0055B1] to-[#52B0FF]"
+            className="cursor-pointer rounded-xl px-8 py-3 text-white font-bold uppercase bg-gradient-to-r from-[#0055B1] to-[#52B0FF]"
             onClick={() => setShowModal(true)}
           >
             {savedCustomizationId ? "Update" : "Save"}
           </button>
 
           <button
-            className="cursor-pointer px-8 py-3 bg-gray-800 text-yellow-500 font-bold uppercase hover:bg-gray-900 transition"
+            className="cursor-pointer rounded-xl px-8 py-3 bg-gray-800 text-yellow-500 font-bold uppercase hover:bg-gray-900 transition"
             onClick={() => {
               setAppliedCustomizations([]);
               setSelectedPart(null);
