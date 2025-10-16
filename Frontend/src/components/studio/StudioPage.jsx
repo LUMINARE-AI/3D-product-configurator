@@ -284,7 +284,7 @@ export default function StudioPage() {
       {/* Toggle Sidebar Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`cursor-pointer fixed top-[20vh] z-[110] h-12 rounded-full bg-gradient-to-r from-[#0055B1] to-[#52B0FF] text-white flex items-center justify-center shadow-lg transition-all duration-300 ease-in-out ${
+        className={`cursor-pointer fixed top-[20vh] z-[110] h-12 rounded-xl bg-gradient-to-r from-[#0055B1] to-[#52B0FF] text-white flex items-center justify-center shadow-lg transition-all duration-300 ease-in-out ${
           sidebarOpen ? "right-[19rem] w-12" : "right-5 w-auto px-5 py-3 gap-2"
         }`}
       >

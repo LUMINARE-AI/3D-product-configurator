@@ -32,7 +32,7 @@ useEffect(() => {
     const maxDim = Math.max(size.x, size.y, size.z);
 
     // 🔹 Set a consistent target size for all models
-    const targetSize = 1.2; // Adjust this value to make all models appear same size
+    const targetSize = 1.5; // Adjust this value to make all models appear same size
 
     // Calculate scale factor
     const scale = targetSize / maxDim;
