@@ -20,35 +20,81 @@ function Model({
   const originalMaterials = useRef({});
   const modelRef = useRef();
 
-  // Auto-scale model to fit viewport perfectly
-  // Auto-scale model to a consistent size for all products
+// Auto-scale model only after product is fully loaded
 useEffect(() => {
-  if (scene) {
+  if (!scene || !url) return;
+
+  // Hide model initially to prevent flickering
+  scene.visible = false;
+
+  // Reset any existing transforms first
+  scene.scale.set(1, 1, 1);
+  scene.position.set(0, 0, 0);
+  scene.rotation.set(0, 0, 0);
+
+  // Small delay to ensure geometry is fully loaded
+  const timer = setTimeout(() => {
+    // Force update all matrices before calculating bounds
+    scene.traverse((child) => {
+      if (child.isMesh) {
+        child.geometry.computeBoundingBox();
+      }
+    });
+    
+    scene.updateMatrixWorld(true);
+    
+    // Calculate bounding box with proper matrix updates
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     box.getSize(size);
 
-    // Get largest dimension (width, height, or depth)
+    console.log("Original model size:", size); // Debug log
+
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    // 🔹 Set a consistent target size for all models
-    const targetSize = 1.5; // Adjust this value to make all models appear same size
+    console.log("Max dimension:", maxDim); // Debug log
 
-    // Calculate scale factor
+    // Prevent division by zero for empty models
+    if (maxDim === 0 || !isFinite(maxDim)) {
+      console.warn("Model has invalid dimensions");
+      scene.visible = true;
+      return;
+    }
+
+    // 🔹 Consistent visible size for all products
+    const targetSize = 1.5; // Adjust this value as needed
     const scale = targetSize / maxDim;
 
-    // Apply scaling
+    console.log("Applying scale:", scale); // Debug log
+
     scene.scale.setScalar(scale);
 
-    // Center the model
+    // Force matrix update after scaling
+    scene.updateMatrixWorld(true);
+    
+    // Recalculate box after scaling
+    const scaledBox = new THREE.Box3().setFromObject(scene);
     const center = new THREE.Vector3();
-    box.getCenter(center);
-    scene.position.sub(center.multiplyScalar(scale));
+    scaledBox.getCenter(center);
+    
+    // Center the model perfectly (x, y, z)
+    scene.position.x = -center.x;
+    scene.position.y = -center.y;
+    scene.position.z = -center.z;
 
-    // Slight lift above ground
-    scene.position.y += size.y * scale * 0.05;
-  }
-}, [scene]);
+    // Slight lift from ground (optional, adjust as needed)
+    const finalSize = new THREE.Vector3();
+    scaledBox.getSize(finalSize);
+    scene.position.y += finalSize.y * 0.05; // Reduce from 0.5 to 0.05
+    
+    console.log("Final scale applied, position:", scene.position); // Debug log
+
+    // Show model after scaling is complete
+    scene.visible = true;
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, [scene, url]);
 
 
   useEffect(() => {
