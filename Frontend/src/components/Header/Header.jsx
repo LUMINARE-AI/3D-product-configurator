@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Logo from "../../assets/images/logo.png"; // path adjust karo
+import Logo from "../../assets/images/tonkexports.png"; // path adjust karo
 import { API_URL } from "../../config";
 
 <img
   src={Logo}
   alt="Logo Ipsom"
-  className="h-10 w-auto"
+  className="h-16 w-auto object-contain transform scale-125"
+  style={{ transformOrigin: "left center" }}
 />
 
 
@@ -17,6 +18,7 @@ const NAV_LINKS = [
   { label: "Home", to: "/" },
   { label: "3D-Studio", to: "/gallery", requiresAuth: true },
   { label: "3D-GenAI", to: "/3d-page", requiresAuth: true },
+  { label: "Quality-Check", to: "/quality-check", requiresAuth: true },
 ];
 
 export default function Header({ buttonLabel = "Login" }) {
@@ -65,7 +67,7 @@ const handleLogout = async () => {
             <img
               src={Logo}
               alt="Logo Ipsom"
-              className="h-10 w-auto"
+              className="h-16 w-auto object-contain transform scale-125"
             />
           </a>
         </div>

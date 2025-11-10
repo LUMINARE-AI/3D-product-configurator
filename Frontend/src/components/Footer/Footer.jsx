@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import Logo from "../../assets/images/logo.png";
+import Logo from "../../assets/images/tonkexports.png";
 import footerbkg from "../../assets/images/footer-bkg.png";
 
 function Footer() {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token"); // ya jo bhi tu use kar raha hai auth ke liye
+  const isLoggedIn = !!localStorage.getItem("token"); 
 
   const handleProtectedLink = (path) => {
     if (isLoggedIn) {
@@ -30,7 +30,7 @@ function Footer() {
               <li>
                 <button
                   onClick={() => handleProtectedLink("/gallery")}
-                  className="hover:text-blue-400"
+                  className="hover:text-blue-400 cursor-pointer"
                 >
                   3D-Studio
                 </button>
@@ -40,16 +40,27 @@ function Footer() {
               <li>
                 <button
                   onClick={() => handleProtectedLink("/3d-page")}
-                  className="hover:text-blue-400"
+                  className="hover:text-blue-400 cursor-pointer"
                 >
                   3D-GenAI
                 </button>
               </li>
+
+              {/* Quality-Check (Protected Link) */}
+              <li>
+                <button
+                  onClick={() => handleProtectedLink("/quality-check")}
+                  className="hover:text-blue-400 cursor-pointer"
+                >
+                  Quality-Check
+                </button>
+              </li>
+              
             </ul>
           </div>
 
           <div className="flex flex-col items-center justify-center flex-1 mx-auto">
-            <img src={Logo} alt="Logo" className="h-12 mb-4" />
+            <img src={Logo} alt="Logo" className="h-28 mb-6" />
             <p className="text-md">
               Revolutionizing the world of woolen crafts with cutting-edge 3D technology.
             </p>

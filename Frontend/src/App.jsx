@@ -12,6 +12,7 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ThreeDPage from "./pages/ThreeDPage";
 import ResetPassword from "./pages/ResetPassword";
+import QualityPage from "./pages/QualityPage";
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/3d-page' element={<ThreeDPage />} />
           <Route path='/reset-password/:token' element={<ResetPassword />} />
+          <Route path='/quality-check' element={<QualityPage />} />
           <Route path="*" element={<h1 className="text-3xl font-bold text-center mt-20">404 - Page Not Found</h1>} />
         </Routes>
       </main>
