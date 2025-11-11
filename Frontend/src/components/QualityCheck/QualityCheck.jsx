@@ -37,6 +37,9 @@ export default function ProductQualityControl() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Update this constant with your backend URL
+  const BACKEND_URL = '${API_URL}/api/v1/quality'; // Change port if needed
+
   const handleImageSelect = (file, type, angle = null) => {
     if (!file) return;
 
@@ -91,23 +94,29 @@ export default function ProductQualityControl() {
     const formData = new FormData();
     
     if (mode === 'single') {
-      formData.append('perfect', perfectImage);
-      formData.append('defective', defectiveImage);
+      // Updated keys to match backend
+      formData.append('perfectImage', perfectImage);
+      formData.append('defectiveImage', defectiveImage);
     } else {
-      formData.append('perfect_front', perfectAngles.front);
-      formData.append('perfect_back', perfectAngles.back);
-      formData.append('perfect_left', perfectAngles.left);
-      formData.append('perfect_right', perfectAngles.right);
+      // Updated keys to match backend (camelCase)
+      formData.append('perfectFront', perfectAngles.front);
+      formData.append('perfectBack', perfectAngles.back);
+      formData.append('perfectLeft', perfectAngles.left);
+      formData.append('perfectRight', perfectAngles.right);
       
-      formData.append('defective_front', defectiveAngles.front);
-      formData.append('defective_back', defectiveAngles.back);
-      formData.append('defective_left', defectiveAngles.left);
-      formData.append('defective_right', defectiveAngles.right);
+      formData.append('defectiveFront', defectiveAngles.front);
+      formData.append('defectiveBack', defectiveAngles.back);
+      formData.append('defectiveLeft', defectiveAngles.left);
+      formData.append('defectiveRight', defectiveAngles.right);
     }
 
     try {
-      const endpoint = mode === 'single' ? '/compare' : '/compare-multiple';
-      const res = await fetch(`http://localhost:8000${endpoint}`, {
+      // Updated endpoints to match backend routes
+      const endpoint = mode === 'single' 
+        ? '/api/quality/compare-single' 
+        : '/api/quality/compare-multi';
+      
+      const res = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
         body: formData,
       });
@@ -119,23 +128,18 @@ export default function ProductQualityControl() {
         throw new Error(errorMsg);
       }
 
-      if (data.success && data.result) {
-        setResult(data.result);
-      } else if (data.result) {
-        setResult(data.result);
-      } else {
-        throw new Error('Invalid response format from server');
-      }
+      // Handle response - backend returns data directly
+      setResult(data);
 
     } catch (err) {
       let errorMessage = 'An error occurred';
       
       if (err.message.includes('Failed to fetch')) {
-        errorMessage = 'Cannot connect to backend. Make sure the server is running.';
+        errorMessage = 'Cannot connect to backend. Make sure the server is running on ' + BACKEND_URL;
       } else if (err.message.includes('NetworkError')) {
         errorMessage = 'Network error. Check your connection and CORS settings.';
       } else if (err.message.includes('404')) {
-        errorMessage = 'Endpoint not found. Make sure backend supports multi-angle comparison.';
+        errorMessage = 'Endpoint not found. Make sure backend routes are correctly configured.';
       } else if (err.message.includes('500')) {
         errorMessage = 'Server error: ' + err.message;
       } else {
@@ -210,8 +214,8 @@ export default function ProductQualityControl() {
         {!preview ? (
           <label className={`flex flex-col items-center justify-center h-48 cursor-pointer rounded-xl border-2 border-dashed transition-all duration-300 ${
             isDefective 
-              ? 'border-gray-300 hover:border-purple-500 bg-linear-to-br from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50'
-              : 'border-gray-300 hover:border-emerald-500 bg-linear-to-br from-gray-50 to-emerald-50/30 hover:from-emerald-50 hover:to-teal-50'
+              ? 'border-gray-300 hover:border-purple-500 bg-gradient-to-br from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50'
+              : 'border-gray-300 hover:border-emerald-500 bg-gradient-to-br from-gray-50 to-emerald-50/30 hover:from-emerald-50 hover:to-teal-50'
           } group/upload`}>
             <Camera className={`w-12 h-12 transition-all duration-300 group-hover/upload:scale-110 ${
               isDefective 
@@ -230,8 +234,8 @@ export default function ProductQualityControl() {
           <div className="relative group/img">
             <div className={`absolute -inset-0.5 rounded-xl blur opacity-25 group-hover/img:opacity-50 transition-opacity ${
               isDefective
-                ? 'bg-linear-to-br from-purple-500 to-pink-500'
-                : 'bg-linear-to-br from-emerald-400 to-teal-500'
+                ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                : 'bg-gradient-to-br from-emerald-400 to-teal-500'
             }`}></div>
             <img
               src={preview}
@@ -248,7 +252,7 @@ export default function ProductQualityControl() {
                   setDefectiveAnglePreviews(prev => ({ ...prev, [angle]: null }));
                 }
               }}
-              className="absolute -top-2 -right-2 bg-linear-to-br from-red-500 to-rose-600 text-white p-2 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
+              className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-rose-600 text-white p-2 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
             >
               <XCircle className="w-4 h-4" />
             </button>
@@ -259,7 +263,7 @@ export default function ProductQualityControl() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 relative overflow-hidden">
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl animate-float"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl animate-float-delayed"></div>
@@ -269,8 +273,8 @@ export default function ProductQualityControl() {
         <div className="text-center mb-12 animate-fadeIn">
           <div className="inline-flex items-center justify-center gap-4 mb-6">
             <div className="relative">
-              <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-purple-600 blur-xl opacity-40 animate-pulse-slow"></div>
-              <div className="relative p-4 bg-linear-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 blur-xl opacity-40 animate-pulse-slow"></div>
+              <div className="relative p-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl">
                 <Eye className="w-12 h-12 text-white" />
               </div>
             </div>
@@ -316,7 +320,7 @@ export default function ProductQualityControl() {
               }}
               className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
                 mode === 'single'
-                  ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -330,7 +334,7 @@ export default function ProductQualityControl() {
               }}
               className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
                 mode === 'multiple'
-                  ? 'bg-linear-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -347,7 +351,7 @@ export default function ProductQualityControl() {
             <div className="group bg-white rounded-3xl p-8 border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="p-3 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <CheckCircle className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -358,7 +362,7 @@ export default function ProductQualityControl() {
               </div>
               
               {!perfectPreview ? (
-                <label className="flex flex-col items-center justify-center h-80 cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-emerald-500 transition-all duration-300 bg-linear-to-br from-gray-50 to-emerald-50/30 hover:from-emerald-50 hover:to-teal-50 group/upload">
+                <label className="flex flex-col items-center justify-center h-80 cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-emerald-500 transition-all duration-300 bg-gradient-to-br from-gray-50 to-emerald-50/30 hover:from-emerald-50 hover:to-teal-50 group/upload">
                   <div className="relative">
                     <Camera className="w-20 h-20 text-gray-400 group-hover/upload:text-emerald-500 transition-all duration-300 group-hover/upload:scale-110" />
                     <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white rounded-full p-1 opacity-0 group-hover/upload:opacity-100 transition-opacity">
@@ -376,18 +380,18 @@ export default function ProductQualityControl() {
                 </label>
               ) : (
                 <div className="relative group/img">
-                  <div className="absolute -inset-1 bg-linear-to-br from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover/img:opacity-50 transition-opacity"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl blur opacity-25 group-hover/img:opacity-50 transition-opacity"></div>
                   <img
                     src={perfectPreview}
                     alt="Perfect sample"
-                    className="relative w-full h-80 object-contain rounded-2xl bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-200 p-4"
+                    className="relative w-full h-80 object-contain rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 p-4"
                   />
                   <button
                     onClick={() => {
                       setPerfectImage(null);
                       setPerfectPreview(null);
                     }}
-                    className="absolute -top-3 -right-3 bg-linear-to-br from-red-500 to-rose-600 text-white p-3 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
+                    className="absolute -top-3 -right-3 bg-gradient-to-br from-red-500 to-rose-600 text-white p-3 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
                   >
                     <XCircle className="w-5 h-5" />
                   </button>
@@ -399,7 +403,7 @@ export default function ProductQualityControl() {
             <div className="group bg-white rounded-3xl p-8 border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <Zap className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -410,7 +414,7 @@ export default function ProductQualityControl() {
               </div>
               
               {!defectivePreview ? (
-                <label className="flex flex-col items-center justify-center h-80 cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-purple-500 transition-all duration-300 bg-linear-to-br from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50 group/upload">
+                <label className="flex flex-col items-center justify-center h-80 cursor-pointer rounded-2xl border-2 border-dashed border-gray-300 hover:border-purple-500 transition-all duration-300 bg-gradient-to-br from-gray-50 to-purple-50/30 hover:from-purple-50 hover:to-pink-50 group/upload">
                   <div className="relative">
                     <Camera className="w-20 h-20 text-gray-400 group-hover/upload:text-purple-500 transition-all duration-300 group-hover/upload:scale-110" />
                     <div className="absolute -bottom-2 -right-2 bg-purple-500 text-white rounded-full p-1 opacity-0 group-hover/upload:opacity-100 transition-opacity">
@@ -428,18 +432,18 @@ export default function ProductQualityControl() {
                 </label>
               ) : (
                 <div className="relative group/img">
-                  <div className="absolute -inset-1 bg-linear-to-br from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover/img:opacity-50 transition-opacity"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover/img:opacity-50 transition-opacity"></div>
                   <img
                     src={defectivePreview}
                     alt="Test sample"
-                    className="relative w-full h-80 object-contain rounded-2xl bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-200 p-4"
+                    className="relative w-full h-80 object-contain rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 p-4"
                   />
                   <button
                     onClick={() => {
                       setDefectiveImage(null);
                       setDefectivePreview(null);
                     }}
-                    className="absolute -top-3 -right-3 bg-linear-to-br from-red-500 to-rose-600 text-white p-3 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
+                    className="absolute -top-3 -right-3 bg-gradient-to-br from-red-500 to-rose-600 text-white p-3 rounded-full opacity-0 group-hover/img:opacity-100 transition-all duration-300 shadow-xl hover:scale-110"
                   >
                     <XCircle className="w-5 h-5" />
                   </button>
@@ -452,7 +456,7 @@ export default function ProductQualityControl() {
             {/* Perfect Angles */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -472,7 +476,7 @@ export default function ProductQualityControl() {
             {/* Defective Angles */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-lg">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -502,9 +506,9 @@ export default function ProductQualityControl() {
                  !Object.values(defectiveAngles).every(img => img !== null))) ||
               loading
             }
-            className="group relative px-12 py-5 bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-xl overflow-hidden"
+            className="group relative px-12 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-xl overflow-hidden"
           >
-            <div className="absolute inset-0 bg-linear-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative flex items-center gap-3">
               {loading ? (
                 <>
@@ -560,7 +564,7 @@ export default function ProductQualityControl() {
           <div className="animate-slideUp">
             <div className="bg-white rounded-3xl p-10 border border-gray-200 shadow-2xl">
               <div className="flex items-center justify-center gap-3 mb-10">
-                <div className="p-2 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-4xl font-bold text-gray-900">
@@ -570,7 +574,7 @@ export default function ProductQualityControl() {
 
               {/* Score and Verdict */}
               <div className="grid md:grid-cols-2 gap-8 mb-10">
-                <div className={`rounded-2xl p-8 text-center border-2 bg-linear-to-br ${getScoreBg(result.quality_score || result.overall_score || 0)} shadow-lg hover:shadow-xl transition-shadow`}>
+                <div className={`rounded-2xl p-8 text-center border-2 bg-gradient-to-br ${getScoreBg(result.quality_score || result.overall_score || 0)} shadow-lg hover:shadow-xl transition-shadow`}>
                   <p className="text-gray-600 mb-4 font-bold text-sm uppercase tracking-wider">Quality Score</p>
                   <div className="relative inline-block">
                     <div className={`text-8xl font-black ${getScoreColor(result.quality_score || result.overall_score || 0)} animate-scaleIn`}>
@@ -580,15 +584,15 @@ export default function ProductQualityControl() {
                   </div>
                   <div className="mt-4 h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full bg-linear-to-r ${(result.quality_score || result.overall_score || 0) >= 8 ? 'from-emerald-500 to-teal-500' : (result.quality_score || result.overall_score || 0) >= 5 ? 'from-amber-500 to-orange-500' : 'from-rose-500 to-red-500'} animate-progressBar`}
+                      className={`h-full bg-gradient-to-r ${(result.quality_score || result.overall_score || 0) >= 8 ? 'from-emerald-500 to-teal-500' : (result.quality_score || result.overall_score || 0) >= 5 ? 'from-amber-500 to-orange-500' : 'from-rose-500 to-red-500'} animate-progressBar`}
                       style={{ width: `${(result.quality_score || result.overall_score || 0) * 10}%` }}
                     ></div>
                   </div>
                 </div>
 
-                <div className="rounded-2xl p-8 bg-linear-to-br from-gray-50 to-gray-100 border-2 border-gray-200 flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow">
+                <div className="rounded-2xl p-8 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 flex flex-col justify-center items-center shadow-lg hover:shadow-xl transition-shadow">
                   <p className="text-gray-600 mb-6 font-bold text-sm uppercase tracking-wider">Final Verdict</p>
-                  <div className={`px-10 py-4 rounded-2xl font-black text-3xl bg-linear-to-r ${getRecommendationStyle(result.recommendation || 'UNKNOWN')} text-white shadow-xl transform hover:scale-105 transition-transform animate-bounce-once`}>
+                  <div className={`px-10 py-4 rounded-2xl font-black text-3xl bg-gradient-to-r ${getRecommendationStyle(result.recommendation || 'UNKNOWN')} text-white shadow-xl transform hover:scale-105 transition-transform animate-bounce-once`}>
                     {result.recommendation || 'UNKNOWN'}
                   </div>
                 </div>
@@ -598,7 +602,7 @@ export default function ProductQualityControl() {
               {mode === 'multiple' && result.angle_results && (
                 <div className="mb-10">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-linear-to-br from-blue-500 to-indigo-500 rounded-xl shadow-lg">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl shadow-lg">
                       <Grid className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-3xl font-bold text-gray-900">Angle-by-Angle Analysis</h3>
@@ -606,7 +610,7 @@ export default function ProductQualityControl() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     {Object.entries(result.angle_results).map(([angle, angleData]) => (
-                      <div key={angle} className="bg-linear-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border-2 border-gray-200 hover:shadow-lg transition-shadow">
+                      <div key={angle} className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border-2 border-gray-200 hover:shadow-lg transition-shadow">
                         <div className="flex items-center justify-between mb-4">
                           <h4 className="text-xl font-bold text-gray-900 uppercase">{angle} View</h4>
                           <div className={`px-4 py-2 rounded-xl font-bold text-lg ${getScoreColor(angleData.quality_score || 0)}`}>
@@ -618,7 +622,7 @@ export default function ProductQualityControl() {
                           <div className="space-y-2">
                             {angleData.defects.map((defect, idx) => (
                               <div key={idx} className="flex items-center gap-2 text-sm">
-                                <span className={`px-3 py-1 rounded-lg text-xs font-bold bg-linear-to-r ${getSeverityStyle(defect.severity)} text-white`}>
+                                <span className={`px-3 py-1 rounded-lg text-xs font-bold bg-gradient-to-r ${getSeverityStyle(defect.severity)} text-white`}>
                                   {defect.severity}
                                 </span>
                                 <span className="text-gray-700 font-medium">{defect.name}</span>
@@ -640,7 +644,7 @@ export default function ProductQualityControl() {
               {/* Defects Section */}
               <div className="mt-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-linear-to-br from-orange-500 to-red-500 rounded-xl shadow-lg">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg">
                     <AlertTriangle className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold text-gray-900">
@@ -653,11 +657,11 @@ export default function ProductQualityControl() {
                     {result.defects.map((defect, index) => (
                       <div
                         key={index}
-                        className="group/defect flex items-start gap-5 p-6 bg-linear-to-r from-gray-50 to-orange-50/30 rounded-2xl border border-gray-200 hover:shadow-lg transition-all duration-300 animate-fadeInSequence"
+                        className="group/defect flex items-start gap-5 p-6 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-2xl border border-gray-200 hover:shadow-lg transition-all duration-300 animate-fadeInSequence"
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
                         <div className="shrink-0">
-                          <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-lg group-hover/defect:scale-110 transition-transform">
+                          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-xl flex items-center justify-center font-black text-xl shadow-lg group-hover/defect:scale-110 transition-transform">
                             {index + 1}
                           </div>
                         </div>
@@ -666,7 +670,7 @@ export default function ProductQualityControl() {
                             {defect.name}
                           </p>
                           <div className="flex items-center gap-4 flex-wrap">
-                            <span className={`px-4 py-2 rounded-xl text-sm font-bold bg-linear-to-r ${getSeverityStyle(defect.severity)} text-white shadow-md`}>
+                            <span className={`px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r ${getSeverityStyle(defect.severity)} text-white shadow-md`}>
                               {defect.severity}
                             </span>
                             <span className="text-gray-600 font-semibold flex items-center gap-2">
@@ -679,8 +683,8 @@ export default function ProductQualityControl() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-16 bg-linear-to-br from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200 shadow-lg animate-scaleIn">
-                    <div className="inline-block p-4 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full mb-4 animate-bounce-once">
+                  <div className="text-center py-16 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200 shadow-lg animate-scaleIn">
+                    <div className="inline-block p-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full mb-4 animate-bounce-once">
                       <CheckCircle className="w-16 h-16 text-white" />
                     </div>
                     <p className="text-emerald-700 font-bold text-2xl mb-2">
@@ -694,7 +698,7 @@ export default function ProductQualityControl() {
               </div>
 
               {/* Raw Response */}
-              <details className="mt-8 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200 group/details hover:shadow-lg transition-shadow">
+              <details className="mt-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200 group/details hover:shadow-lg transition-shadow">
                 <summary className="cursor-pointer font-bold text-lg text-gray-700 hover:text-blue-600 transition-colors flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <span className="p-1.5 bg-blue-100 rounded-lg">
