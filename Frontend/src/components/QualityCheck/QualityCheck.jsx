@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, CheckCircle, XCircle, AlertTriangle, Loader, Sparkles, Camera, Eye, Shield, Zap, Grid, Image } from 'lucide-react';
+import { API_URL } from '../../config';
 
 export default function ProductQualityControl() {
   const [mode, setMode] = useState('single');
@@ -38,7 +39,7 @@ export default function ProductQualityControl() {
   const [error, setError] = useState(null);
 
   // Update this constant with your backend URL
-  const BACKEND_URL = '${API_URL}/api/v1/quality'; // Change port if needed
+  const BACKEND_URL = `${API_URL}/api/v1/quality`; // Change port if needed
 
   const handleImageSelect = (file, type, angle = null) => {
     if (!file) return;
