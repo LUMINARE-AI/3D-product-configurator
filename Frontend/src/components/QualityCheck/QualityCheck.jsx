@@ -114,8 +114,8 @@ export default function ProductQualityControl() {
     try {
       // Updated endpoints to match backend routes
       const endpoint = mode === 'single' 
-        ? '/api/quality/compare-single' 
-        : '/api/quality/compare-multi';
+        ? '/compare-single' 
+        : '/compare-multi';
       
       const res = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: 'POST',
