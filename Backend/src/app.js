@@ -29,12 +29,14 @@ import userRouter from "./routes/user.routes.js";
 import productRouter from "./routes/product.routes.js";
 import customizeRouter from "./routes/customize.routes.js";
 import tripoRoutes from "./routes/tripo.routes.js";
+import qualityRoutes from "./routes/quality.routes.js";
 
 //routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/customizations", customizeRouter);
 app.use("/api/v1/tripo", tripoRoutes);
+app.use("/api/v1/quality", qualityRoutes);
 
 // Root route
 app.get("/", (req, res) => {
