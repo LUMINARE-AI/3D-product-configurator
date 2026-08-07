@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useAdmin } from "../../hooks/useAdmin.js";
-import {API_URL} from "../../config.js";
+import { API_URL } from "../../config.js";
+import { unwrapList } from "../../utils/api.js";
 
 const FeaturedCreations = () => {
   const [products, setProducts] = useState([]);
@@ -19,14 +20,10 @@ const FeaturedCreations = () => {
       try {
         const res = await fetch(`${API_URL}/api/v1/products/all`);
         const data = await res.json();
+        const list = unwrapList(data);
 
-        if (Array.isArray(data.message)) {
-          setProducts(data.message);
-          setFilteredProducts(data.message);
-        } else {
-          setProducts([]);
-          setFilteredProducts([]);
-        }
+        setProducts(list);
+        setFilteredProducts(list);
       } catch (error) {
         console.error("Error fetching products:", error);
         setProducts([]);

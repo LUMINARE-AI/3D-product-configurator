@@ -6,6 +6,7 @@ import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import "react-toastify/dist/ReactToastify.css";
 import { API_URL } from "../config.js";
+import { isValidEmail, isStrongPassword } from "../utils/api.js";
 
 function Signup() {
   const [signupInfo, setSignupInfo] = React.useState({
@@ -29,6 +30,14 @@ function Signup() {
     if (!name || !email || !password) {
       return toast.error("Please fill all the fields");
     }
+    if (!isValidEmail(email)) {
+      return toast.error("Please enter a valid email address");
+    }
+    if (!isStrongPassword(password)) {
+      return toast.error(
+        "Password must be 8+ characters with at least one letter and one number"
+      );
+    }
     try {
       const url = `${API_URL}/api/v1/users/register`;
       const response = await fetch(url, {
@@ -36,6 +45,7 @@ function Signup() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(signupInfo),
       });
       const result = await response.json();

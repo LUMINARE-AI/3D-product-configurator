@@ -1,32 +1,26 @@
 import { Router } from "express";
-import { 
-  textToModel, 
-  getTaskStatus, 
-  uploadImage, 
+import {
+  textToModel,
+  getTaskStatus,
+  uploadImage,
   imageToModel,
-  multiImageToModel ,
-  getBalance
+  multiImageToModel,
+  getBalance,
 } from "../controllers/tripo.controller.js";
 import { upload } from "../middlewares/upload.middlewares.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { aiLimiter } from "../middlewares/rateLimit.middleware.js";
 
 const router = Router();
 
-// Text to Model
+router.use(verifyJWT);
+router.use(aiLimiter);
+
 router.post("/text-to-model", textToModel);
-
-// Upload Image
 router.post("/upload", upload.single("file"), uploadImage);
-
-// Single Image to Model
 router.post("/image-to-model", imageToModel);
-
-// 🆕 Multi Image to Model
 router.post("/multi-image-to-model", multiImageToModel);
-
-// Get Task Status (for polling)
 router.get("/task/:taskId", getTaskStatus);
-
-// Get Account Balance
 router.get("/balance", getBalance);
 
 export default router;

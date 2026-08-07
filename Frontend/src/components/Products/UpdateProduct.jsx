@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_URL } from "../../config.js";
+import { apiFetch, unwrapData } from "../../utils/api.js";
 
 export default function UpdateProduct() {
   const { id } = useParams();
@@ -23,9 +24,10 @@ export default function UpdateProduct() {
         const res = await fetch(`${API_URL}/api/v1/products/${id}`);
         const data = await res.json();
         if (res.ok) {
+          const product = unwrapData(data) || {};
           setForm({
-            name: data.message?.name || data.data?.name || "",
-            description: data.message?.description || data.data?.description || "",
+            name: product.name || "",
+            description: product.description || "",
             coverImageURL: null,
             modelFile: null,
           });
@@ -99,9 +101,8 @@ export default function UpdateProduct() {
       formData.append("modelFile", form.modelFile);
     }
 
-    const response = await fetch(`${API_URL}/api/v1/products/edit/${id}`, {
+    const response = await apiFetch(`/api/v1/products/edit/${id}`, {
       method: "PUT",
-      credentials: 'include',  // ✅ This is required!
       body: formData,
     });
 

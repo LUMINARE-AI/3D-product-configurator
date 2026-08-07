@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Trash2 } from "lucide-react"; // Delete icon
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {API_URL} from "../../config.js";
+import { apiFetch } from "../../utils/api.js";
 
 const ProductCard = ({ products, setProducts, isAdmin }) => {
   const navigate = useNavigate();
@@ -64,15 +64,13 @@ const ProductCard = ({ products, setProducts, isAdmin }) => {
     try {
       setDeletingId(id);
 
-      const res = await fetch(
-        `${API_URL}/api/v1/products/delete/${id}`,
-        {
-          method: "POST",
-        }
-      );
+      const res = await apiFetch(`/api/v1/products/delete/${id}`, {
+        method: "POST",
+      });
 
       if (!res.ok) {
-        throw new Error("Failed to delete product");
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to delete product");
       }
 
       toast.success("Product deleted ✅");
@@ -81,7 +79,7 @@ const ProductCard = ({ products, setProducts, isAdmin }) => {
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (error) {
       console.error("Delete error:", error);
-      toast.error(error || "Failed to delete ❌");
+      toast.error(error.message || "Failed to delete ❌");
     } finally {
       setDeletingId(null);
     }

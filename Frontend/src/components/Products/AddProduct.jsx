@@ -1,8 +1,7 @@
-// src/components/Products/AddProduct.jsx
 import { useState } from "react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../../config";
+import { apiFetch } from "../../utils/api";
 
 export default function AddProduct() {
   const [form, setForm] = useState({
@@ -40,7 +39,6 @@ export default function AddProduct() {
 
     try {
       setLoading(true);
-      const url = `${API_URL}/api/v1/products/create`;
       const formData = new FormData();
 
       formData.append("name", form.name);
@@ -48,15 +46,10 @@ export default function AddProduct() {
       formData.append("coverImageURL", form.coverImageURL);
       formData.append("modelFile", form.modelFile);
 
-      console.log("Sending request to:", url); // ✅ Debug log
-
-      const response = await fetch(url, {
+      const response = await apiFetch("/api/v1/products/create", {
         method: "POST",
         body: formData,
-        credentials: "include", // ✅ IMPORTANT - Add this
       });
-
-      console.log("Response status:", response.status); // ✅ Debug log
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

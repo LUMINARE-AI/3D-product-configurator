@@ -2,10 +2,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
 import sendEmail from "../utils/sendEmail.js";
+import { getCookieOptions } from "../utils/cookieOptions.js";
+import { validateEmail, validatePassword } from "../utils/validators.js";
 
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
@@ -32,14 +33,17 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const existedUser = await User.findOne({ email });
+  const normalizedEmail = validateEmail(email);
+  validatePassword(password);
+
+  const existedUser = await User.findOne({ email: normalizedEmail });
   if (existedUser) {
     throw new ApiError(409, "User with email already exists");
   }
 
   const user = await User.create({
-    name,
-    email,
+    name: name.trim(),
+    email: normalizedEmail,
     password,
   });
 
@@ -53,20 +57,21 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered Successfully"));
+    .json(new ApiResponse(201, createdUser, "User registered Successfully"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email) {
-    throw new ApiError(400, "email is required");
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
   }
 
-  const user = await User.findOne({ email });
+  const normalizedEmail = validateEmail(email);
+  const user = await User.findOne({ email: normalizedEmail });
 
   if (!user) {
-    throw new ApiError(400, "User not found");
+    throw new ApiError(400, "Invalid user credentials");
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
@@ -83,10 +88,7 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
+  const options = getCookieOptions();
 
   return res
     .status(200)
@@ -99,7 +101,7 @@ const loginUser = asyncHandler(async (req, res) => {
           user: loggedInUser,
           accessToken,
           refreshToken,
-          role: loggedInUser.role  // ✅ Send role to frontend
+          role: loggedInUser.role,
         },
         "User logged In Successfully"
       )
@@ -119,10 +121,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
+  const options = getCookieOptions();
 
   return res
     .status(200)
@@ -155,12 +154,9 @@ const RefreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh token is expired or used");
     }
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+    const options = getCookieOptions();
 
-    const { accessToken, newRefreshToken } =
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefereshTokens(user._id);
 
     return res
@@ -198,6 +194,8 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
+  validatePassword(newPassword);
+
   const user = await User.findById(req.user._id).select("+password");
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -219,8 +217,8 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(200, req.user, "User fetched successfully");
-})
+    .json(new ApiResponse(200, req.user, "User fetched successfully"));
+});
 
 const forgotPassword = async (req, res) => {
   let user;
@@ -236,8 +234,18 @@ const forgotPassword = async (req, res) => {
       });
     }
 
+    let normalizedEmail;
+    try {
+      normalizedEmail = validateEmail(email);
+    } catch (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message || "Invalid email"
+      });
+    }
+
     // Find user
-    user = await User.findOne({ email });
+    user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({
@@ -382,7 +390,7 @@ const forgotPassword = async (req, res) => {
 
     // Send email
     await sendEmail({
-      to: email,
+      to: normalizedEmail,
       subject: "🔑 Password Reset Request - Action Required",
       html: htmlMessage
     });
@@ -421,10 +429,12 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    try {
+      validatePassword(newPassword);
+    } catch (err) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 6 characters"
+        message: err.message || "Invalid password"
       });
     }
 

@@ -1,8 +1,8 @@
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
-import dotenv from 'dotenv';
-import fs from 'fs';
-import { url } from 'inspector';
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -14,43 +14,44 @@ const s3 = new AWS.S3({
 
 const uploadFileToS3 = async (file) => {
   try {
-    const fileKey = `${uuidv4()}-${file.originalname}`;
+    const safeName = path.basename(file.originalname).replace(/[^\w.\-]/g, "_");
+    const fileKey = `${uuidv4()}-${safeName}`;
     const fileContent = fs.readFileSync(file.path);
 
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: fileKey,
-      Body: fileContent,       
+      Body: fileContent,
       ContentType: file.mimetype,
     };
 
     const data = await s3.upload(params).promise();
-    fs.unlinkSync(file.path); // Clean up the temp file
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
     return {
       url: data.Location,
-      key: fileKey
+      key: fileKey,
     };
   } catch (error) {
     console.error("S3 Upload Error:", error);
-    fs.unlinkSync(file.path); // Clean up the temp file
+    if (file?.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
     throw error;
   }
-  
 };
 
-// Extract key from URL
 const extractFileKey = (url) => {
   try {
     const urlObj = new URL(url);
-    return decodeURIComponent(urlObj.pathname.substring(1)); 
-    // eg: uploads/abc.png
+    return decodeURIComponent(urlObj.pathname.substring(1));
   } catch (err) {
     console.error("URL parse error:", err);
     throw err;
   }
 };
 
-// Delete from S3
 const deleteFileFromS3 = async (fileUrlOrKey) => {
   try {
     const Key = fileUrlOrKey.includes("http")
@@ -72,19 +73,12 @@ const deleteFileFromS3 = async (fileUrlOrKey) => {
 
 const updateFileInS3 = async (oldFileUrl, newFile) => {
   try {
-    // Upload new file first
     const newFileUrl = await uploadFileToS3(newFile);
 
-    // Delete old file if exists
     if (oldFileUrl) {
-      await deleteFileFromS3(oldFileUrl).catch(err => 
+      await deleteFileFromS3(oldFileUrl).catch((err) =>
         console.log("Old file deletion failed:", err.message)
       );
-    }
-
-    // Delete local temp file
-    if (newFile.path && fs.existsSync(newFile.path)) {
-      fs.unlinkSync(newFile.path);
     }
 
     return newFileUrl;

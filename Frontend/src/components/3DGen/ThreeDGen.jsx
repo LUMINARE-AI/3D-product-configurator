@@ -9,8 +9,24 @@ import {
   Wallet,
 } from "lucide-react";
 import { API_URL } from "../../config";
+import { authHeaders } from "../../utils/api";
 
 const API_BASE = `${API_URL}/api/v1/tripo`;
+
+const tripoFetch = (path, options = {}) => {
+  const { headers, ...rest } = options;
+  const isFormData =
+    typeof FormData !== "undefined" && rest.body instanceof FormData;
+  return fetch(`${API_BASE}${path}`, {
+    credentials: "include",
+    ...rest,
+    headers: {
+      ...authHeaders(),
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...headers,
+    },
+  });
+};
 
 const ThreeDGen = () => {
   const [mode, setMode] = useState("text");
@@ -56,7 +72,7 @@ const ThreeDGen = () => {
   const fetchBalance = async () => {
     setBalanceLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/balance`);
+      const res = await tripoFetch(`/balance`);
       const data = await res.json();
 
       if (data.success) {
@@ -75,7 +91,7 @@ const ThreeDGen = () => {
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API_BASE}/task/${taskId}`);
+        const res = await tripoFetch(`/task/${taskId}`);
         const contentType = res.headers.get("content-type");
 
         if (!contentType || !contentType.includes("application/json")) {
@@ -156,9 +172,8 @@ const ThreeDGen = () => {
     setProgress(0);
 
     try {
-      const res = await fetch(`${API_BASE}/text-to-model`, {
+      const res = await tripoFetch(`/text-to-model`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: textInput }),
       });
 
@@ -221,7 +236,7 @@ const ThreeDGen = () => {
       const formData = new FormData();
       formData.append("file", imageFile);
 
-      const uploadRes = await fetch(`${API_BASE}/upload`, {
+      const uploadRes = await tripoFetch(`/upload`, {
         method: "POST",
         body: formData,
       });
@@ -241,9 +256,8 @@ const ThreeDGen = () => {
 
       setStatus("Image uploaded! Creating 3D model...");
 
-      const taskRes = await fetch(`${API_BASE}/image-to-model`, {
+      const taskRes = await tripoFetch(`/image-to-model`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image_token: imageToken,
           file_type: fileExtension,
@@ -295,7 +309,7 @@ const ThreeDGen = () => {
 
         setStatus(`Uploading ${position} image...`);
 
-        const uploadRes = await fetch(`${API_BASE}/upload`, {
+        const uploadRes = await tripoFetch(`/upload`, {
           method: "POST",
           body: formData,
         });
@@ -321,9 +335,8 @@ const ThreeDGen = () => {
 
       setStatus("All images uploaded! Creating 3D model...");
 
-      const taskRes = await fetch(`${API_BASE}/multi-image-to-model`, {
+      const taskRes = await tripoFetch(`/multi-image-to-model`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image_tokens: imageTokens }),
       });
 

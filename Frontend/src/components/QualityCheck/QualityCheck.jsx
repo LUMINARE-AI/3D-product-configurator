@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, CheckCircle, XCircle, AlertTriangle, Loader, Sparkles, Camera, Eye, Shield, Zap, Grid, Image } from 'lucide-react';
-import { API_URL } from '../../config';
+import { apiFetch } from '../../utils/api';
 
 export default function ProductQualityControl() {
   const [mode, setMode] = useState('single');
@@ -39,7 +39,7 @@ export default function ProductQualityControl() {
   const [error, setError] = useState(null);
 
   // Update this constant with your backend URL
-  const BACKEND_URL = `${API_URL}/api/v1/quality`; // Change port if needed
+  const BACKEND_PATH = `/api/v1/quality`; // Change port if needed
 
   const handleImageSelect = (file, type, angle = null) => {
     if (!file) return;
@@ -117,7 +117,7 @@ export default function ProductQualityControl() {
         ? '/compare-single' 
         : '/compare-multi';
       
-      const res = await fetch(`${BACKEND_URL}${endpoint}`, {
+      const res = await apiFetch(`${BACKEND_PATH}${endpoint}`, {
         method: 'POST',
         body: formData,
       });
@@ -136,7 +136,7 @@ export default function ProductQualityControl() {
       let errorMessage = 'An error occurred';
       
       if (err.message.includes('Failed to fetch')) {
-        errorMessage = 'Cannot connect to backend. Make sure the server is running on ' + BACKEND_URL;
+        errorMessage = 'Cannot connect to backend. Make sure the server is running.';
       } else if (err.message.includes('NetworkError')) {
         errorMessage = 'Network error. Check your connection and CORS settings.';
       } else if (err.message.includes('404')) {

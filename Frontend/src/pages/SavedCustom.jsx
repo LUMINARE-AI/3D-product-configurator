@@ -3,8 +3,8 @@ import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import CustomizationCard from "../components/CustomizationCard";
 import Loader from "../components/Animations/Loader";
-import { API_URL } from "../config";
 import { useAuth } from "../hooks/useAuth";
+import { apiFetch, unwrapList } from "../utils/api";
 
 
 
@@ -18,7 +18,7 @@ const SavedCustom = () => {
     const fetchCustomizations = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/api/v1/customizations/all-cust`);
+        const response = await apiFetch("/api/v1/customizations/mine");
         
         if (!response.ok) {
           const errorText = await response.text();
@@ -26,23 +26,7 @@ const SavedCustom = () => {
         }
         
         const data = await response.json();
-        console.log("Fetched data:", data);
-        console.log("Data structure:", JSON.stringify(data, null, 2));
-        
-        // Handle the specific data structure your backend returns
-        let customizationsArray = [];
-        if (data.message && Array.isArray(data.message)) {
-          // Your current backend structure puts data in 'message' field
-          customizationsArray = data.message;
-        } else if (data.data && Array.isArray(data.data)) {
-          customizationsArray = data.data;
-        } else if (Array.isArray(data)) {
-          customizationsArray = data;
-        } else {
-          console.warn("Unexpected data structure:", data);
-        }
-        
-        setCustomizations(customizationsArray);
+        setCustomizations(unwrapList(data));
       } catch (err) {
         console.error("Error fetching customizations:", err);
         setError(err.message);

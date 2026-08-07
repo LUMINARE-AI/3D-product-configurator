@@ -6,6 +6,7 @@ import ProductCanvas from "../Three/ProductCanvas";
 import SaveCustomizationModal from "../SavedCustomizationsPage.jsx/SaveCustomizationModal";
 import { useAuth } from "../../hooks/useAuth";
 import { API_URL } from "../../config";
+import { apiFetch, unwrapList, unwrapData } from "../../utils/api";
 
 export default function StudioPage() {
   const navigate = useNavigate();
@@ -29,11 +30,10 @@ export default function StudioPage() {
       try {
         const res = await fetch(`${API_URL}/api/v1/products/all`);
         const data = await res.json();
-        if (Array.isArray(data.message)) {
-          setAllProducts(data.message);
-          const current = data.message.find((p) => p._id === id);
-          setCurrentProduct(current);
-        }
+        const list = unwrapList(data);
+        setAllProducts(list);
+        const current = list.find((p) => p._id === id);
+        setCurrentProduct(current);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -44,29 +44,29 @@ export default function StudioPage() {
     }
   }, [id]);
 
-  // 🔥 NEW: Load the last saved customization for this product
+  // Load the last saved customization for this product
   useEffect(() => {
     const loadLastCustomization = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/v1/customizations/all`);
+        const res = await apiFetch(`/api/v1/customizations/mine`);
         const data = await res.json();
-        
-        if (data.success && Array.isArray(data.message)) {
-          // Find the most recent customization for this product
-          const productCustomizations = data.message
-            .filter((c) => c.baseProduct._id === id)
+        const list = unwrapList(data);
+
+        if (list.length > 0) {
+          const productCustomizations = list
+            .filter((c) => c.baseProduct?._id === id || c.baseProduct === id)
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          
+
           if (productCustomizations.length > 0) {
             const latestCustomization = productCustomizations[0];
             setAppliedCustomizations(latestCustomization.customizations);
             setSavedCustomizationId(latestCustomization._id);
-            
+
             if (latestCustomization.customizations.length > 0) {
               setSelectedPart(latestCustomization.customizations[0].partName);
               setCurrentColor(latestCustomization.customizations[0].color);
             }
-            
+
             toast.info("✨ Loaded your last saved customization");
           }
         }
@@ -140,9 +140,8 @@ export default function StudioPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/api/v1/customizations/save`, {
+      const res = await apiFetch(`/api/v1/customizations/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           baseProductId: id,
           name,
@@ -154,11 +153,10 @@ export default function StudioPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setSavedCustomizationId(data.message._id);
+        const saved = unwrapData(data);
+        setSavedCustomizationId(saved?._id);
         toast.success("✅ Customization saved successfully!");
         setShowModal(false);
-        // Don't navigate away, keep the customization visible
-        // navigate("/saved-customizations");
       } else {
         toast.error(data.message || "❌ Failed to save customization");
       }

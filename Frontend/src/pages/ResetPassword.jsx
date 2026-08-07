@@ -22,8 +22,11 @@ function ResetPassword() {
       return toast.error("Please fill all fields");
     }
 
-    if (newPassword.length < 6) {
-      return toast.error("Password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      return toast.error("Password must be at least 8 characters");
+    }
+    if (!/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      return toast.error("Password must include at least one letter and one number");
     }
 
     if (newPassword !== confirmPassword) {

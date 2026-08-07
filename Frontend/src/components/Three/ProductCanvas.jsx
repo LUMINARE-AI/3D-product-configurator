@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import StudioSidebar from "../studio/StudioSidebar";
 import Loader from "../Animations/Loader";
 import { API_URL } from "../../config";
+import { unwrapData } from "../../utils/api";
 import * as THREE from "three";
 
 function Model({
@@ -273,7 +274,7 @@ function ProductCanvasBase({
       try {
         const res = await fetch(`${API_URL}/api/v1/products/${id}`);
         const data = await res.json();
-        setProduct(data.message);
+        setProduct(unwrapData(data));
       } catch (err) {
         console.error("Error fetching product:", err);
       } finally {

@@ -1,13 +1,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Configure Gemini
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-if (!GOOGLE_API_KEY) {
-    throw new Error("GOOGLE_API_KEY not found in environment variables");
-}
+let model = null;
 
-const genai = new GoogleGenerativeAI(GOOGLE_API_KEY);
-const model = genai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+function getModel() {
+  if (model) return model;
+
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+  if (!GOOGLE_API_KEY) {
+    throw new Error("GOOGLE_API_KEY not found in environment variables");
+  }
+
+  const genai = new GoogleGenerativeAI(GOOGLE_API_KEY);
+  model = genai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+  return model;
+}
 
 /**
  * Create quality assessment prompt for single image comparison
@@ -98,7 +104,7 @@ async function compareWithGemini(perfectBytes, defectiveBytes) {
         
         // Generate analysis
         const prompt = createQualityPrompt();
-        const result = await model.generateContent([prompt, ...imageParts]);
+        const result = await getModel().generateContent([prompt, ...imageParts]);
         const response = await result.response;
         const text = response.text();
         
@@ -184,7 +190,7 @@ async function compareMultiAngleWithGemini(
         
         // Generate analysis
         const prompt = createMultiAnglePrompt();
-        const result = await model.generateContent([prompt, ...imageParts]);
+        const result = await getModel().generateContent([prompt, ...imageParts]);
         const response = await result.response;
         const text = response.text();
         

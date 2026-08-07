@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Logo from "../../assets/images/tonkexports.png"; // path adjust karo
-import { API_URL } from "../../config";
+import { apiFetch } from "../../utils/api";
 
 <img
   src={Logo}
@@ -24,6 +24,7 @@ const NAV_LINKS = [
 export default function Header({ buttonLabel = "Login" }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token");
 
   useEffect(() => {
     // lock body scroll when mobile menu is open
@@ -35,9 +36,9 @@ export default function Header({ buttonLabel = "Login" }) {
 
 const handleLogout = async () => {
   try {
-    const response = await fetch(`${API_URL}/api/v1/users/logout`, {
+    const response = await apiFetch("/api/v1/users/logout", {
       method: "POST",
-      credentials: "include",
+      skipAuthRefresh: true,
     });
 
     if (!response.ok) {
@@ -45,14 +46,16 @@ const handleLogout = async () => {
     }
 
     localStorage.removeItem("token");
-    localStorage.removeItem("userRole"); // ✅ Clear role
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("loggedInUser");
     toast.success("Logout successfully!");
     navigate("/");
     
   } catch (error) {
     console.error("Logout failed:", error.message);
     localStorage.removeItem("token");
-    localStorage.removeItem("userRole"); // ✅ Clear role
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("loggedInUser");
     toast.info("Logged out locally");
     navigate("/");
   }
@@ -98,13 +101,23 @@ const handleLogout = async () => {
         </nav>
 
         {/* Desktop button */}
-        <button
-          onClick={() => buttonLabel === "LogOut" ? handleLogout() : navigate("/login")}
-          className=" font-montserrat cursor-pointer hidden md:flex px-7 py-3 items-center justify-center gap-2 rounded-xl font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF] transition-all duration-700 ease-in-out hover:bg-[#d93a75]"
-        >
-          {buttonLabel}
-          <i className="fa-solid fa-right-to-bracket"></i>
-        </button>
+        <div className="hidden md:flex items-center gap-3">
+          {isLoggedIn && (
+            <button
+              onClick={() => navigate("/change-password")}
+              className="font-montserrat cursor-pointer px-4 py-2.5 rounded-xl font-semibold text-[#0055B1] border border-[#0055B1]/40 hover:bg-blue-50"
+            >
+              Password
+            </button>
+          )}
+          <button
+            onClick={() => buttonLabel === "LogOut" ? handleLogout() : navigate("/login")}
+            className=" font-montserrat cursor-pointer px-7 py-3 items-center justify-center gap-2 rounded-xl font-semibold text-white shadow bg-gradient-to-r from-[#0055B1] to-[#52B0FF] transition-all duration-700 ease-in-out hover:bg-[#d93a75]"
+          >
+            {buttonLabel}
+            <i className="fa-solid fa-right-to-bracket"></i>
+          </button>
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -167,8 +180,24 @@ const handleLogout = async () => {
             </a>
           ))}
 
+          {isLoggedIn && (
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                navigate("/change-password");
+              }}
+              className="text-left text-lg font-semibold text-[#0055B1]"
+            >
+              Change Password
+            </button>
+          )}
+
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              setMenuOpen(false);
+              if (buttonLabel === "LogOut") handleLogout();
+              else navigate("/login");
+            }}
             className="font-montserrat cursor-pointer mt-4 px-7 py-3 rounded-xl font-semibold text-white bg-[#e94a85] hover:bg-[#d93a75] transition-all duration-700 ease-in-out"
           >
             {buttonLabel}

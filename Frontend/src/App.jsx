@@ -13,6 +13,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ThreeDPage from "./pages/ThreeDPage";
 import ResetPassword from "./pages/ResetPassword";
 import QualityPage from "./pages/QualityPage";
+import ChangePassword from "./pages/ChangePassword";
+import { ProtectedRoute, AdminRoute } from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -22,18 +24,82 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<Gallery />} />
-          <Route path="/create-product" element={<CreateProduct />} />
-          <Route path="/studio/:id" element={<Studio />} />
-          <Route path="/studio" element={<Studio />} />
-          <Route path="/saved-customizations" element={<SavedCustom />} />
-          <Route path="/edit/:id" element={<UpdateProductPage />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/signup' element={<SignUp />} />
-          <Route path='/forgot-password' element={<ForgotPassword />} />
-          <Route path='/3d-page' element={<ThreeDPage />} />
-          <Route path='/reset-password/:token' element={<ResetPassword />} />
-          <Route path='/quality-check' element={<QualityPage />} />
-          <Route path="*" element={<h1 className="text-3xl font-bold text-center mt-20">404 - Page Not Found</h1>} />
+          <Route
+            path="/create-product"
+            element={
+              <AdminRoute>
+                <CreateProduct />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/studio/:id"
+            element={
+              <ProtectedRoute>
+                <Studio />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/studio"
+            element={
+              <ProtectedRoute>
+                <Studio />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/saved-customizations"
+            element={
+              <ProtectedRoute>
+                <SavedCustom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit/:id"
+            element={
+              <AdminRoute>
+                <UpdateProductPage />
+              </AdminRoute>
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/3d-page"
+            element={
+              <ProtectedRoute>
+                <ThreeDPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route
+            path="/quality-check"
+            element={
+              <ProtectedRoute>
+                <QualityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <h1 className="text-3xl font-bold text-center mt-20">
+                404 - Page Not Found
+              </h1>
+            }
+          />
         </Routes>
       </main>
     </>
